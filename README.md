@@ -3,10 +3,10 @@
 ![Crates.io version](https://img.shields.io/crates/v/kingler)
 ![AUR version](https://img.shields.io/aur/version/kingler-bin)
 
-Krabby is mostly a Rust rewrite of phoney badger's [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
+Kingler is an enhanced version of Krabby [krabby](https://github.com/yannjor/krabby) that is mostly a Rust rewrite of phoney badger's [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
 with some extra features.
 
-![](https://i.imgur.com/MVzaS3k.png)
+![](https://art.pixilart.com/4cd54b1841a761c.png)
 
 ## Table of contents
 * [Features](#features)
@@ -22,7 +22,7 @@ with some extra features.
 * [Similar projects](#similar-projects)
 
 
-## Features
+## Features of Krabby
 - Pokemon from every generation, including shinies, megas, gigantamax, and regional variants
 - Print random pokemon (with filters for generations and different forms)
 - Print pokemon by name
@@ -40,7 +40,7 @@ with some extra features.
 
 ## Installation
 
-### Arch Linux x86_64 (and derivatives)
+### Arch Linux x86_64 (and derivatives) ----TODO
 
 From the AUR using your favorite AUR helper
 
@@ -55,14 +55,14 @@ makepkg -si
 
 There is also the development package [kingler-git](https://aur.archlinux.org/packages/kingler-git) that tracks the main branch.
 
-### Ubuntu/Debian x86_64 (and derivatives)
+### Ubuntu/Debian x86_64 (and derivatives) ----TODO
 
 Download the latest `.deb` release. Then run (replacing v.v.v with the version number)
 ```
 dpkg -i kingler_v.v.v_amd64.deb
 ```
 
-### Homebrew
+### Homebrew ----TODO
 
 Add the tap:
 ```
@@ -99,6 +99,7 @@ OPTIONS:
     -V, --version    Print version information
 
 SUBCOMMANDS:
+    init      Obtain self completions
     help      Print this message or the help of the given subcommand(s)
     list      Print list of all pokemon
     name      Select pokemon by name. Generally spelled like in the games. A few exceptions are
