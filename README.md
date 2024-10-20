@@ -10,6 +10,7 @@ with some extra features.
 
 ## Table of contents
 * [Features](#features)
+  * [This fork](#this-fork)
 * [Installation](#installation)
   * [Arch Linux x86_64 (and derivatives)](#arch-linux-x86_64-and-derivatives)
   * [Ubuntu/Debian x86_64 (and derivatives)](#ubuntudebian-x86_64-and-derivatives)
@@ -27,6 +28,11 @@ with some extra features.
 - Print pokemon by name
 - Print pokedex entry together with the sprite
 - Configuration file, right now only for language and shiny rate
+
+### This fork
+- The text of the pokedex entry was moved under the sprite
+- The text of the pokedex entry is random with every description of every games about that pokemon, but you can choose the language
+- It is added a script for scraping of the pokemon API so everyone can create a custom JSON
 
 ## Installation
 
@@ -149,6 +155,7 @@ On Windows this will be: `C:\Users\<username>\AppData\Roaming\krabby`
 ```toml
 # The language to use when printing the pokemon's name and/or description.
 # Possible options include en (English), fr (French), de (German), ja (Japanese),
+# ko (Korean), es (Espanol), it (Italian), ja-Hrkt (Japanese Hiragana) 
 # zh_hans (Chinese with simplified characters), zh_hant (Chinese with traditional characters)
 language = 'en'
 
