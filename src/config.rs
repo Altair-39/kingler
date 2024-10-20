@@ -11,8 +11,7 @@ const BINARY_NAME: &str = env!("CARGO_PKG_NAME");
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
 pub struct Config {
-    /// Language used when printing pokemon names and descriptions. Possible
-    /// values include en, fr, de, ja, zh_hans, zh_hant
+    /// Language used when printing pokemon names and descriptions.
     pub language: String,
     /// The probability to display a shiny pokemon with the random command
     pub shiny_rate: f64,
@@ -21,7 +20,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            language: "black".to_string(),
+            language: "en".to_string(),
             shiny_rate: 1.0 / 128.0,
         }
     }

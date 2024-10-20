@@ -1,10 +1,8 @@
 [package]
-name = "krabby"
+name = "kingler"
 version = "0.2.0"
 authors = ["Yann Jorelle <yann@yannjorelle.com>"]
 description = "Print pokemon sprites in your terminal"
-repository = "https://github.com/yannjor/krabby"
-homepage = "https://github.com/yannjor/krabby"
 edition = "2021"
 readme = "README.md"
 license = "GPL-3.0"

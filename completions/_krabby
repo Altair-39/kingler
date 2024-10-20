@@ -1,8 +1,8 @@
-#compdef krabby
+#compdef kingler
 
 autoload -U is-at-least
 
-_krabby() {
+_kingler() {
     typeset -A opt_args
     typeset -a _arguments_options
     local ret=1
@@ -17,14 +17,14 @@ _krabby() {
     _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-":: :_krabby_commands" \
-"*::: :->krabby" \
+":: :_kingler_commands" \
+"*::: :->kingler" \
 && ret=0
     case $state in
-    (krabby)
+    (kingler)
         words=($line[1] "${words[@]}")
         (( CURRENT += 1 ))
-        curcontext="${curcontext%:*:*}:krabby-command-$line[1]:"
+        curcontext="${curcontext%:*:*}:kingler-command-$line[1]:"
         case $line[1] in
             (init)
 _arguments "${_arguments_options[@]}" : \
@@ -82,7 +82,7 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (help)
 _arguments "${_arguments_options[@]}" : \
-":: :_krabby__help_commands" \
+":: :_kingler__help_commands" \
 "*::: :->help" \
 && ret=0
 
@@ -90,7 +90,7 @@ _arguments "${_arguments_options[@]}" : \
     (help)
         words=($line[1] "${words[@]}")
         (( CURRENT += 1 ))
-        curcontext="${curcontext%:*:*}:krabby-help-command-$line[1]:"
+        curcontext="${curcontext%:*:*}:kingler-help-command-$line[1]:"
         case $line[1] in
             (init)
 _arguments "${_arguments_options[@]}" : \
@@ -121,8 +121,8 @@ esac
 esac
 }
 
-(( $+functions[_krabby_commands] )) ||
-_krabby_commands() {
+(( $+functions[_kingler_commands] )) ||
+_kingler_commands() {
     local commands; commands=(
 'init:Generate shell completions' \
 'list:List all names of pokemons' \
@@ -130,10 +130,10 @@ _krabby_commands() {
 'random:Show random pokemon' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
-    _describe -t commands 'krabby commands' commands "$@"
+    _describe -t commands 'kingler commands' commands "$@"
 }
-(( $+functions[_krabby__help_commands] )) ||
-_krabby__help_commands() {
+(( $+functions[_kingler__help_commands] )) ||
+_kingler__help_commands() {
     local commands; commands=(
 'init:Generate shell completions' \
 'list:List all names of pokemons' \
@@ -141,56 +141,56 @@ _krabby__help_commands() {
 'random:Show random pokemon' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
-    _describe -t commands 'krabby help commands' commands "$@"
+    _describe -t commands 'kingler help commands' commands "$@"
 }
-(( $+functions[_krabby__help__help_commands] )) ||
-_krabby__help__help_commands() {
+(( $+functions[_kingler__help__help_commands] )) ||
+_kingler__help__help_commands() {
     local commands; commands=()
-    _describe -t commands 'krabby help help commands' commands "$@"
+    _describe -t commands 'kingler help help commands' commands "$@"
 }
-(( $+functions[_krabby__help__init_commands] )) ||
-_krabby__help__init_commands() {
+(( $+functions[_kingler__help__init_commands] )) ||
+_kingler__help__init_commands() {
     local commands; commands=()
-    _describe -t commands 'krabby help init commands' commands "$@"
+    _describe -t commands 'kingler help init commands' commands "$@"
 }
-(( $+functions[_krabby__help__list_commands] )) ||
-_krabby__help__list_commands() {
+(( $+functions[_kingler__help__list_commands] )) ||
+_kingler__help__list_commands() {
     local commands; commands=()
-    _describe -t commands 'krabby help list commands' commands "$@"
+    _describe -t commands 'kingler help list commands' commands "$@"
 }
-(( $+functions[_krabby__help__name_commands] )) ||
-_krabby__help__name_commands() {
+(( $+functions[_kingler__help__name_commands] )) ||
+_kingler__help__name_commands() {
     local commands; commands=()
-    _describe -t commands 'krabby help name commands' commands "$@"
+    _describe -t commands 'kingler help name commands' commands "$@"
 }
-(( $+functions[_krabby__help__random_commands] )) ||
-_krabby__help__random_commands() {
+(( $+functions[_kingler__help__random_commands] )) ||
+_kingler__help__random_commands() {
     local commands; commands=()
-    _describe -t commands 'krabby help random commands' commands "$@"
+    _describe -t commands 'kingler help random commands' commands "$@"
 }
-(( $+functions[_krabby__init_commands] )) ||
-_krabby__init_commands() {
+(( $+functions[_kingler__init_commands] )) ||
+_kingler__init_commands() {
     local commands; commands=()
-    _describe -t commands 'krabby init commands' commands "$@"
+    _describe -t commands 'kingler init commands' commands "$@"
 }
-(( $+functions[_krabby__list_commands] )) ||
-_krabby__list_commands() {
+(( $+functions[_kingler__list_commands] )) ||
+_kingler__list_commands() {
     local commands; commands=()
-    _describe -t commands 'krabby list commands' commands "$@"
+    _describe -t commands 'kingler list commands' commands "$@"
 }
-(( $+functions[_krabby__name_commands] )) ||
-_krabby__name_commands() {
+(( $+functions[_kingler__name_commands] )) ||
+_kingler__name_commands() {
     local commands; commands=()
-    _describe -t commands 'krabby name commands' commands "$@"
+    _describe -t commands 'kingler name commands' commands "$@"
 }
-(( $+functions[_krabby__random_commands] )) ||
-_krabby__random_commands() {
+(( $+functions[_kingler__random_commands] )) ||
+_kingler__random_commands() {
     local commands; commands=()
-    _describe -t commands 'krabby random commands' commands "$@"
+    _describe -t commands 'kingler random commands' commands "$@"
 }
 
-if [ "$funcstack[1]" = "_krabby" ]; then
-    _krabby "$@"
+if [ "$funcstack[1]" = "_kingler" ]; then
+    _kingler "$@"
 else
-    compdef _krabby krabby
+    compdef _kingler kingler
 fi

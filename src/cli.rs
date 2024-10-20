@@ -39,7 +39,7 @@ pub fn build() -> Command {
             arg!(--"no-regional" "Do not show regional pokemon"),
         ]);
 
-    Command::new("krabby").subcommands([init, list, name, random])
+    Command::new("kingler").subcommands([init, list, name, random])
 }
 
 pub fn print_completions<G: Generator>(gen: G, cmd: &mut Command) {

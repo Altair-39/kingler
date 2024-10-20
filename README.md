@@ -1,7 +1,7 @@
-# krabby
+# kingler
 
-![Crates.io version](https://img.shields.io/crates/v/krabby)
-![AUR version](https://img.shields.io/aur/version/krabby-bin)
+![Crates.io version](https://img.shields.io/crates/v/kingler)
+![AUR version](https://img.shields.io/aur/version/kingler-bin)
 
 Krabby is mostly a Rust rewrite of phoney badger's [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
 with some extra features.
@@ -45,7 +45,7 @@ with some extra features.
 From the AUR using your favorite AUR helper
 
 ```
-yay -S krabby-bin
+yay -S kingler-bin
 ```
 
 Or alternatively you can manually download the PKGBUILD file from the repository, then run
@@ -53,34 +53,34 @@ Or alternatively you can manually download the PKGBUILD file from the repository
 makepkg -si
 ```
 
-There is also the development package [krabby-git](https://aur.archlinux.org/packages/krabby-git) that tracks the main branch.
+There is also the development package [kingler-git](https://aur.archlinux.org/packages/kingler-git) that tracks the main branch.
 
 ### Ubuntu/Debian x86_64 (and derivatives)
 
 Download the latest `.deb` release. Then run (replacing v.v.v with the version number)
 ```
-dpkg -i krabby_v.v.v_amd64.deb
+dpkg -i kingler_v.v.v_amd64.deb
 ```
 
 ### Homebrew
 
 Add the tap:
 ```
-brew tap yannjor/krabby
+brew tap yannjor/kingler
 ```
 
 Install:
 ```
-brew install krabby
+brew install kingler
 ```
 
 ### Installing from source (other distros and MacOS/Windows)
 
-To install krabby from source, you will need Rust. Installation instructions can be found [here](https://www.rust-lang.org/learn/get-started).
+To install kingler from source, you will need Rust. Installation instructions can be found [here](https://www.rust-lang.org/learn/get-started).
 
 Now using cargo, run
 ```
-cargo install krabby
+cargo install kingler
 ```
 Make sure you have `.cargo/bin` added to your shell `PATH`. This can be done by adding the following to your `.profile`, `.bash_profile` or `.zprofile`
 ```sh
@@ -88,11 +88,11 @@ export PATH="$PATH:$HOME/.cargo/bin"
 ```
 
 ## Usage
-Run the help command `krabby help` to see the following help message.
+Run the help command `kingler help` to see the following help message.
 
 ```
 USAGE:
-    krabby <SUBCOMMAND>
+    kingler <SUBCOMMAND>
 
 OPTIONS:
     -h, --help       Print help information
@@ -111,50 +111,50 @@ SUBCOMMANDS:
 ```
 To get more detailed information about a subcommand you can also view its help, for example
 ```
-krabby help random
+kingler help random
 ```
 To get the help of the random subcommand.
 
 ### Examples
 Print a specific pokemon
 ```
-krabby name charizard
+kingler name charizard
 ```
 Print a specific shiny pokemon
 ```
-krabby name spheal -s
+kingler name spheal -s
 ```
 Print a specific pokemon together with its pokedex entry
 ```
-krabby name mudkip -i
+kingler name mudkip -i
 ```
 Print an alternative form of a pokemon
 ```
-krabby name blastoise -f mega
+kingler name blastoise -f mega
 ```
 Print a random pokemon (gens 1-9)
 ```
-krabby random
+kingler random
 ```
 Print random pokemon from generations 1-3
 ```
-krabby random 1-3
+kingler random 1-3
 ```
 Print a random pokemon from generations 1,3 and 6
 ```
-krabby random 1,3,6
+kingler random 1,3,6
 ```
 Print a random pokemon excluding megas, gigantamax and regional variants
 ```
-krabby random --no-mega --no-gmax --no-regional
+kingler random --no-mega --no-gmax --no-regional
 ```
 
 ## Configuration
 When the program is run, a TOML config file will automatically be created in the user's config
-directory (usually `~/.config`) under `krabby/config.toml` if it doesn't exist already. 
+directory (usually `~/.config`) under `kingler/config.toml` if it doesn't exist already. 
 
-On MacOS the config will be in: `/Users/<username>/Library/Application Support/krabby`
-On Windows this will be: `C:\Users\<username>\AppData\Roaming\krabby`
+On MacOS the config will be in: `/Users/<username>/Library/Application Support/kingler`
+On Windows this will be: `C:\Users\<username>\AppData\Roaming\kingler`
 
 ```toml
 # The language to use when printing the pokemon's name and/or description.
@@ -168,7 +168,7 @@ shiny_rate = 0.0078125
 ```
 
 ## Credits
-The pokemon sprites for krabby were generated using sprites from [PokéSprite](https://msikma.github.io/pokesprite/)
+The pokemon sprites for kingler were generated using sprites from [PokéSprite](https://msikma.github.io/pokesprite/)
 and converted to unicode using Phoney Badger's [pokemon-generator-scripts](https://gitlab.com/phoneybadger/pokemon-generator-scripts).
 The pokemon data was obtained from [PokéAPI](https://github.com/PokeAPI/pokeapi).
 
