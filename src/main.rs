@@ -8,6 +8,7 @@ use pokemon::*;
 
 use clap::{Args, Parser, Subcommand};
 use rand::seq::SliceRandom;
+use rand::thread_rng;
 use rand::Rng;
 use rust_embed::RustEmbed;
 
@@ -208,15 +209,18 @@ fn show_pokemon_by_name(
                 .for_each(|line| println!("{: <1$}{line}", "", name.padding_left));
 
             if name.info {
-                let languages: Vec<&String> = pokemon.desc.keys().collect();
-
-                if let Some(random_language) = languages.choose(&mut rand::thread_rng()) {
-                    if let Some(description) = pokemon.desc.get(*random_language) {
-                        let lines: Vec<&str> = description.lines().collect();
-                        if let Some(random_line) = lines.choose(&mut rand::thread_rng()) {
-                            println!("{: <1$}{random_line}", "", name.padding_left);
+                if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
+                    let games: Vec<&String> = game_descriptions.keys().collect();
+                    if let Some(random_game) = games.choose(&mut thread_rng()) {
+                        if let Some(description) = game_descriptions.get(*random_game) {
+                            println!("{}", description);
                         }
                     }
+                } else {
+                    println!(
+                        "No descriptions available for language: {}",
+                        config.language
+                    );
                 }
             }
         }

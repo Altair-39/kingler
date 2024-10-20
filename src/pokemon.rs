@@ -11,7 +11,7 @@ pub struct Pokemon {
     pub slug: String,
     pub gen: u8,
     pub name: HashMap<String, String>,
-    pub desc: HashMap<String, String>,
+    pub desc: HashMap<String, HashMap<String, String>>,
     pub forms: Vec<String>,
 }
 
