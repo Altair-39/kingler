@@ -1,3 +1,4 @@
+mod cli;
 mod config;
 mod error;
 mod pokemon;
@@ -7,6 +8,7 @@ use error::Error;
 use pokemon::*;
 
 use clap::{Args, Parser, Subcommand};
+use clap_complete::Shell;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use rand::Rng;
@@ -35,6 +37,13 @@ enum Commands {
     /// generation or range of generations. The generations can be provided as
     /// a continuous range (eg. 1-3) or as a list of generations (1,3,6)
     Random(Random),
+    /// zsh completions
+    Init(ShellName),
+}
+
+#[derive(Debug, Args)]
+struct ShellName {
+    shell: Shell,
 }
 
 #[derive(Debug, Args)]
@@ -233,13 +242,16 @@ fn show_pokemon_by_name(
 
 fn main() -> Result<(), Error> {
     let config = Config::load()?;
-    let pokemon_db = Asset::get("pokemon.json").expect("Could not read pokemond db file");
+    let pokemon_db = Asset::get("pokemon.json").expect("Could not read pokemon db file");
     let pokemon = load_pokemon(&pokemon_db)?;
     let args = Cli::parse();
+
     match args.command {
+        Commands::Init(shell) => cli::print_completions(shell.shell, &mut cli::build()),
         Commands::List => list_pokemon_names(pokemon),
         Commands::Name(name) => show_pokemon_by_name(&name, pokemon, &config)?,
         Commands::Random(random) => show_random_pokemon(&random, pokemon, &config)?,
     }
+
     Ok(())
 }
