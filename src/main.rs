@@ -9,6 +9,7 @@ use pokemon::*;
 
 use clap::{Args, Parser, Subcommand};
 use clap_complete::Shell;
+use rand::random;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use rand::Rng;
@@ -94,7 +95,9 @@ struct Random {
     /// Do not display pokemon name
     #[clap(long)]
     no_title: bool,
-
+    /// desc under or not
+    #[clap(short, long)]
+    under: bool,
     /// Do not show mega pokemon
     #[clap(long)]
     no_mega: bool,
@@ -134,26 +137,26 @@ fn show_random_pokemon(
         }
     };
 
-    let start_gen = start_gen.parse::<u8>();
-    let end_gen = end_gen.parse::<u8>();
-    let (start_gen, end_gen) = match (start_gen, end_gen) {
-        (Ok(s), Ok(e)) => (s, e),
-        _ => return Err(Error::InvalidGeneration(random.generations.clone())),
-    };
+    let start_gen = start_gen
+        .parse::<u8>()
+        .map_err(|_| Error::InvalidGeneration(random.generations.clone()))?;
+    let end_gen = end_gen
+        .parse::<u8>()
+        .map_err(|_| Error::InvalidGeneration(random.generations.clone()))?;
 
     // Filter by generation
-    let pokemon = pokemon_db
+    let pokemon: Vec<&Pokemon> = pokemon_db
         .iter()
         .filter(|p| start_gen <= p.gen && end_gen >= p.gen)
-        .collect::<Vec<_>>();
+        .collect();
 
     let pokemon = match pokemon.choose(&mut rand::thread_rng()) {
-        Some(p) => Ok(p),
-        None => Err(Error::InvalidGeneration(random.generations.clone())),
-    }?;
+        Some(&p) => p,
+        _none => return Err(Error::InvalidGeneration(random.generations.clone())),
+    };
 
     let mut forms = vec!["regular".to_string()];
-    forms.extend_from_slice(&pokemon.forms);
+    forms.extend(pokemon.forms.iter().cloned());
 
     // Optional filters
     if random.no_mega {
@@ -166,17 +169,22 @@ fn show_random_pokemon(
         forms.retain(|f| !["alola", "galar", "hisui", "paldea"].contains(&f.as_str()));
     }
 
+    let under = random.under; // Define under based on your context
+
     // Choose a form to show
     let form = forms.choose(&mut rand::thread_rng()).unwrap();
     let shiny = rand::thread_rng().gen_bool(config.shiny_rate) || random.shiny;
+
+    // Ensure `info` is defined correctly before passing it
+    let info = random.info; // Set to true to always show info, adjust according to your needs
 
     show_pokemon_by_name(
         &Name {
             name: pokemon.slug.clone(),
             form: form.to_string(),
             shiny,
-            info: true, // Set to true to always show info
-            under: true,
+            info,
+            under,
             no_title: random.no_title,
             padding_left: random.padding_left,
         },
