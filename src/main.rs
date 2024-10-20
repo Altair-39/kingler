@@ -68,6 +68,10 @@ struct Name {
     #[clap(long)]
     no_title: bool,
 
+    /// desc under or not
+    #[clap(short, long)]
+    under: bool,
+
     /// Left padding
     #[clap(long, default_value = "0")]
     padding_left: usize,
@@ -172,12 +176,87 @@ fn show_random_pokemon(
             form: form.to_string(),
             shiny,
             info: true, // Set to true to always show info
+            under: true,
             no_title: random.no_title,
             padding_left: random.padding_left,
         },
         pokemon_db,
         config,
     )
+}
+
+fn draw_pokemon_art(art: &str, desc_lines: Vec<&str>, padding_left: usize, language: &str) {
+    let lines: Vec<&str> = art.lines().collect();
+    let desc_width = desc_lines.iter().map(|line| line.len()).max().unwrap_or(0);
+
+    // Calculate the midpoint of the ASCII art
+    let mid_index = lines.len() / 2;
+
+    // Determine the starting index for descriptions
+    let start_index = if lines.len() >= 3 {
+        mid_index.saturating_sub(1) // Start one line above the midpoint if there are 3 or more lines
+    } else {
+        mid_index // Use midpoint for less than 3 lines
+    };
+
+    // Print the art with descriptions starting from the determined start index
+    for (i, line) in lines.iter().enumerate() {
+        print!("{: <1$}", line, padding_left);
+        print!("\t\t");
+
+        // Print the description if within the range and adjust its starting position
+        if i >= start_index && i - start_index < desc_lines.len() {
+            // Calculate the padding for the description to start at the determined index
+            let description_padding = padding_left + desc_width + 1; // Add extra space for visual separation
+            println!(
+                "\x1b[37m{: <1$}\x1b[0m",
+                desc_lines[i - start_index],
+                description_padding
+            );
+        } else {
+            println!();
+        }
+    }
+
+    // Inform if there are no descriptions available
+    if desc_lines.is_empty() {
+        println!(
+            "{: <1$}No descriptions available for language: {} {}",
+            "", padding_left, language
+        );
+    }
+}
+
+fn draw_pokemon_art_under(art: &str, desc_lines: Vec<&str>, padding_left: usize, language: &str) {
+    let lines: Vec<&str> = art.lines().collect();
+    let desc_width = desc_lines.iter().map(|line| line.len()).max().unwrap_or(0);
+
+    // Print the ASCII art
+    for line in lines.iter() {
+        print!("{: <1$}", line, padding_left);
+        println!(); // New line after each art line
+    }
+
+    // Print descriptions if available
+    if !desc_lines.is_empty() {
+        let description_padding = padding_left + desc_width + 1; // Add extra space for visual separation
+        for desc in desc_lines {
+            println!("\x1b[37m{: <1$}\x1b[0m", desc, description_padding);
+        }
+    } else {
+        // Inform if there are no descriptions available
+        println!(
+            "{: <1$}No descriptions available for language: {} {}",
+            "", padding_left, language
+        );
+    }
+}
+
+fn print_ascii_art(art: &str, padding_left: usize) {
+    for line in art.lines() {
+        print!("{: <1$}", line, padding_left);
+        println!(); // New line after each art line
+    }
 }
 
 fn show_pokemon_by_name(
@@ -192,48 +271,61 @@ fn show_pokemon_by_name(
             } else {
                 format!("{}-{}", name.name, name.form)
             };
+
             let art_path = if name.shiny {
                 format!("colorscripts/shiny/{}", slug)
             } else {
                 format!("colorscripts/regular/{}", slug)
             };
+
             let art = Asset::get(&art_path)
                 .unwrap_or_else(|| panic!("Could not read pokemon art of '{}'", slug))
                 .data;
             let art = str::from_utf8(&art).expect("Invalid UTF-8 in pokemon art");
+
             if !name.no_title {
                 let pokemon_name = match pokemon.name.get(&config.language) {
                     Some(n) => n,
-                    _none => return Err(Error::InvalidLanguage(config.language.clone())),
+                    _ => return Err(Error::InvalidLanguage(config.language.clone())),
                 };
-                print!("{: <1$}{pokemon_name}", "", name.padding_left);
+                print!("{: <1$}", pokemon_name, name.padding_left);
                 match name.form.as_str() {
                     "regular" => println!(),
                     other => println!(" ({other})"),
                 }
             }
 
-            println!();
-            art.lines()
-                .for_each(|line| println!("{: <1$}{line}", "", name.padding_left));
-
-            if name.info {
+            // Gather descriptions
+            let desc_lines: Vec<&str> = if name.info {
                 if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
                     let games: Vec<&String> = game_descriptions.keys().collect();
                     if let Some(random_game) = games.choose(&mut thread_rng()) {
-                        if let Some(description) = game_descriptions.get(*random_game) {
-                            println!("{}", description);
-                        }
+                        game_descriptions
+                            .get(*random_game)
+                            .map(|desc| desc.lines().collect())
+                    } else {
+                        None
                     }
                 } else {
-                    println!(
-                        "No descriptions available for language: {}",
-                        config.language
-                    );
+                    None
                 }
+            } else {
+                None
+            }
+            .unwrap_or_default();
+
+            // Call the appropriate drawing function based on the `under` flag
+            if name.info {
+                if name.under {
+                    draw_pokemon_art_under(art, desc_lines, name.padding_left, &config.language);
+                } else {
+                    draw_pokemon_art(art, desc_lines, name.padding_left, &config.language);
+                }
+            } else {
+                print_ascii_art(art, name.padding_left);
             }
         }
-        _none => {
+        _ => {
             return Err(Error::InvalidPokemon(name.name.clone()));
         }
     }
