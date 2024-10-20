@@ -125,9 +125,13 @@ Print a specific shiny pokemon
 ```
 kingler name spheal -s
 ```
-Print a specific pokemon together with its pokedex entry
+Print a specific pokemon together with a random pokedex entry
 ```
 kingler name mudkip -i
+```
+Print a specific pokemon together with a specific pokedex entry
+```
+kingler name mudkip -i --game-info=ruby
 ```
 Print an alternative form of a pokemon
 ```
@@ -148,6 +152,14 @@ kingler random 1,3,6
 Print a random pokemon excluding megas, gigantamax and regional variants
 ```
 kingler random --no-mega --no-gmax --no-regional
+```
+Print a random pokemon with his stats
+```
+kingler random --stats
+```
+Print a random pokemon with stats and info under
+```
+kingler random -iu --stats
 ```
 
 ## Configuration
