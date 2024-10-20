@@ -407,9 +407,27 @@ fn show_pokemon_by_name(
             // Display stats if the `stats` flag is set
             if name.stats {
                 if let Some(stats) = &pokemon.stats {
-                    for (stat_name, value) in stats {
-                        // Format the output with the stat name followed by a colon, then the value
-                        println!("{:<15} {}", format!("{}:", stat_name), value);
+                    // Define pairs of stats to display on the same line
+                    let stat_pairs = [
+                        ("hp", "speed"),
+                        ("attack", "special-attack"),
+                        ("defense", "special-defense"),
+                    ];
+
+                    // Print each pair of stats on the same line
+                    for &(stat1, stat2) in &stat_pairs {
+                        // Get the values for each stat, if they exist
+                        let value1 = stats.get(stat1).unwrap_or(&0);
+                        let value2 = stats.get(stat2).unwrap_or(&0);
+
+                        // Format the output with the stat names followed by their values
+                        println!(
+                            "{:<15} {:<5}  {:<15} {}",
+                            format!("{}:", stat1),
+                            value1,
+                            format!("{}:", stat2),
+                            value2
+                        );
                     }
                 } else {
                     println!("\nStats not available for this Pokémon.");
