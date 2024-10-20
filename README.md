@@ -40,7 +40,7 @@ with some extra features.
 
 ## Installation
 
-### Arch Linux x86_64 (and derivatives) ----TODO
+### Arch Linux x86_64 (and derivatives)
 
 From the AUR using your favorite AUR helper
 
@@ -66,7 +66,7 @@ dpkg -i kingler_v.v.v_amd64.deb
 
 Add the tap:
 ```
-brew tap yannjor/kingler
+brew tap Luca-Barra/kingler
 ```
 
 Install:
