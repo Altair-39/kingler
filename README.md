@@ -33,6 +33,7 @@ with some extra features.
 - The text of the pokedex entry was moved. With the right flag you can choose if you want it under the pokemon or alongside
 - There are more pokedex description: every description of every games about that pokemon, you can choose the language and
   the game
+- To make this program more pokedex-like it is added a command to see the stats
 - It is added a script for scraping of the pokemon API so everyone can create a custom JSON
 - Custom shell completions
 

@@ -13,6 +13,7 @@ pub struct Pokemon {
     pub name: HashMap<String, String>,
     pub desc: HashMap<String, HashMap<String, String>>,
     pub forms: Vec<String>,
+    pub stats: Option<std::collections::HashMap<String, u32>>,
 }
 
 pub fn load_pokemon(pokemon_db: &EmbeddedFile) -> Result<Vec<Pokemon>, Error> {

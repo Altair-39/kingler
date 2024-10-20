@@ -79,6 +79,10 @@ struct Name {
     /// Left padding
     #[clap(long, default_value = "0")]
     padding_left: usize,
+
+    /// Stats
+    #[clap(long)]
+    stats: bool,
 }
 
 #[derive(Debug, Args)]
@@ -121,6 +125,10 @@ struct Random {
     /// Left padding
     #[clap(long, default_value = "0")]
     padding_left: usize,
+
+    /// Stats
+    #[clap(long)]
+    stats: bool,
 }
 
 #[derive(RustEmbed)]
@@ -206,6 +214,7 @@ fn show_random_pokemon(
             under: random.under,
             no_title: random.no_title,
             padding_left: random.padding_left,
+            stats: random.stats,
         },
         pokemon_db,
         config,
@@ -285,6 +294,17 @@ fn print_ascii_art(art: &str, padding_left: usize) {
         println!(); // New line after each art line
     }
 }
+fn get_random_description<'a>(pokemon: &'a Pokemon, config: &'a Config) -> Vec<&'a str> {
+    if let Some(descriptions) = pokemon.desc.get(&config.language) {
+        let game_keys: Vec<&String> = descriptions.keys().collect();
+        if let Some(random_game) = game_keys.choose(&mut rand::thread_rng()) {
+            if let Some(desc) = descriptions.get(*random_game) {
+                return desc.lines().collect(); // Return lines from the selected description.
+            }
+        }
+    }
+    Vec::new() // Return an empty vector if no descriptions are found.
+}
 
 fn show_pokemon_by_name(
     name: &Name,
@@ -322,7 +342,6 @@ fn show_pokemon_by_name(
                 }
             }
             if name.game_info.is_empty() {
-                // Gather descriptions
                 let desc_lines: Vec<&str> = if name.info {
                     if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
                         let games: Vec<&String> = game_descriptions.keys().collect();
@@ -340,7 +359,7 @@ fn show_pokemon_by_name(
                     None
                 }
                 .unwrap_or_default();
-                // Call the appropriate drawing function based on the `under` flag
+
                 if name.info {
                     if name.under {
                         draw_pokemon_art_under(
@@ -357,23 +376,18 @@ fn show_pokemon_by_name(
                 }
             } else {
                 let desc_lines: Vec<&str> = if name.info {
-                    // Check if there are descriptions available for the specified language
                     if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
-                        // Use name.game_info directly to fetch the specific game description
                         if let Some(game_desc) = game_descriptions.get(&name.game_info) {
-                            // Collect lines of the game description
                             game_desc.lines().collect()
                         } else {
-                            Vec::new() // Return an empty vector if the game description is not found
+                            get_random_description(pokemon, config)
                         }
                     } else {
-                        Vec::new() // Return an empty vector if there are no game descriptions for the language
+                        get_random_description(pokemon, config)
                     }
                 } else {
-                    Vec::new() // Return an empty vector if name.info is false
+                    Vec::new()
                 };
-
-                // Call the appropriate drawing function based on the `under` flag
                 if name.info {
                     if name.under {
                         draw_pokemon_art_under(
@@ -387,6 +401,18 @@ fn show_pokemon_by_name(
                     }
                 } else {
                     print_ascii_art(art, name.padding_left);
+                }
+            }
+
+            // Display stats if the `stats` flag is set
+            if name.stats {
+                if let Some(stats) = &pokemon.stats {
+                    for (stat_name, value) in stats {
+                        // Format the output with the stat name followed by a colon, then the value
+                        println!("{:<15} {}", format!("{}:", stat_name), value);
+                    }
+                } else {
+                    println!("\nStats not available for this Pokémon.");
                 }
             }
         }

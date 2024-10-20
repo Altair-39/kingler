@@ -42,6 +42,9 @@ def fetch_pokemon_data():
             slug = data['name']
             idx = data['id']
 
+            # Fetch stats data
+            stats = {stat['stat']['name']: stat['base_stat'] for stat in data['stats']}
+
             # Fetch species data to get the Pokédex entry
             species_response = requests.get(f"{species_url}{id}")
             if species_response.status_code == 200:
@@ -74,6 +77,7 @@ def fetch_pokemon_data():
                         "en": slug.capitalize(),  # Capitalize slug for the English name
                     },
                     "desc": language_descriptions,  # Use descriptions by language
+                    "stats": stats,  # Add the stats data
                     "forms": [],  # Placeholder for forms
                 }
                 pokemon_data.append(pokemon_info)
