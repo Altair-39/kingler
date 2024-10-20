@@ -86,15 +86,12 @@ _krabby() {
     return ret
 }
 
-# Fetch Pokémon names for completion in lowercase
+# Fetch Pokémon names from PokéAPI
 _krabby_pokemon_names() {
     local pokemon_names
-    # All Pokémon names in lowercase
-    pokemon_names=(
-        'bulbasaur' 'charmander' 'squirtle' 'pidgey' 'pikachu' 'jigglypuff' 
-        'meowth' 'psyduck' 'machop' 'geodude' 'onix' 'gyarados' 'eevee' 'snorlax' 
-        # Add more Pokémon names here in lowercase
-    )
+    # Fetch data from PokéAPI
+    pokemon_names=($(curl -s "https://pokeapi.co/api/v2/pokemon?limit=1000" | jq -r '.results[].name'))
+
     # Use _describe to present them as completions
     _describe -t pokemons 'pokemon names' pokemon_names
 }
