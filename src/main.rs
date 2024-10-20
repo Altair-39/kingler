@@ -9,7 +9,6 @@ use pokemon::*;
 
 use clap::{Args, Parser, Subcommand};
 use clap_complete::Shell;
-use rand::random;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use rand::Rng;
@@ -65,6 +64,10 @@ struct Name {
     #[clap(short, long)]
     info: bool,
 
+    /// Pokedex entry for specific game
+    #[clap(long, default_value = "")]
+    game_info: String,
+
     /// Do not display pokemon name
     #[clap(long)]
     no_title: bool,
@@ -88,6 +91,9 @@ struct Random {
     #[clap(short, long)]
     info: bool,
 
+    #[clap(long, default_value = "")]
+    game_info: String,
+
     /// Show the shiny version of the pokemon instead
     #[clap(short, long)]
     shiny: bool,
@@ -95,9 +101,11 @@ struct Random {
     /// Do not display pokemon name
     #[clap(long)]
     no_title: bool,
+
     /// desc under or not
     #[clap(short, long)]
     under: bool,
+
     /// Do not show mega pokemon
     #[clap(long)]
     no_mega: bool,
@@ -128,15 +136,17 @@ fn show_random_pokemon(
     pokemon_db: Vec<Pokemon>,
     config: &Config,
 ) -> Result<(), Error> {
+    // Determine generation range
     let (start_gen, end_gen) = match random.generations.split_once('-') {
         Some(gens) => gens,
         _none => {
             let gen_list = random.generations.split(',').collect::<Vec<_>>();
-            let gen = gen_list.choose(&mut rand::thread_rng()).unwrap();
-            (*gen, *gen)
+            let gen = gen_list.choose(&mut rand::thread_rng()).unwrap_or(&"1");
+            (*gen, *gen) // Dereference to convert to (&str, &str)
         }
     };
 
+    // Parse start and end generations
     let start_gen = start_gen
         .parse::<u8>()
         .map_err(|_| Error::InvalidGeneration(random.generations.clone()))?;
@@ -144,21 +154,23 @@ fn show_random_pokemon(
         .parse::<u8>()
         .map_err(|_| Error::InvalidGeneration(random.generations.clone()))?;
 
-    // Filter by generation
+    // Filter Pokémon by generation
     let pokemon: Vec<&Pokemon> = pokemon_db
         .iter()
         .filter(|p| start_gen <= p.gen && end_gen >= p.gen)
         .collect();
 
+    // Check if there are any Pokémon available after filtering
     let pokemon = match pokemon.choose(&mut rand::thread_rng()) {
         Some(&p) => p,
         _none => return Err(Error::InvalidGeneration(random.generations.clone())),
     };
 
+    // Prepare forms to choose from
     let mut forms = vec!["regular".to_string()];
     forms.extend(pokemon.forms.iter().cloned());
 
-    // Optional filters
+    // Apply optional filters
     if random.no_mega {
         forms.retain(|f| !["mega", "mega-x", "mega-y"].contains(&f.as_str()));
     }
@@ -169,22 +181,29 @@ fn show_random_pokemon(
         forms.retain(|f| !["alola", "galar", "hisui", "paldea"].contains(&f.as_str()));
     }
 
-    let under = random.under; // Define under based on your context
-
     // Choose a form to show
-    let form = forms.choose(&mut rand::thread_rng()).unwrap();
+    let default_form = "regular".to_string(); // Create a long-lived string
+    let form = forms
+        .choose(&mut rand::thread_rng())
+        .unwrap_or(&default_form); // Use a reference to the long-lived string
+
     let shiny = rand::thread_rng().gen_bool(config.shiny_rate) || random.shiny;
 
-    // Ensure `info` is defined correctly before passing it
-    let info = random.info; // Set to true to always show info, adjust according to your needs
+    // Pass the active game if `game_info` is present; otherwise, default to an empty string
+    let game_name = if random.game_info.is_empty() {
+        String::new()
+    } else {
+        random.game_info.clone()
+    };
 
     show_pokemon_by_name(
         &Name {
             name: pokemon.slug.clone(),
             form: form.to_string(),
             shiny,
-            info,
-            under,
+            info: random.info,
+            game_info: game_name,
+            under: random.under,
             no_title: random.no_title,
             padding_left: random.padding_left,
         },
@@ -302,35 +321,73 @@ fn show_pokemon_by_name(
                     other => println!(" ({other})"),
                 }
             }
-
-            // Gather descriptions
-            let desc_lines: Vec<&str> = if name.info {
-                if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
-                    let games: Vec<&String> = game_descriptions.keys().collect();
-                    if let Some(random_game) = games.choose(&mut thread_rng()) {
-                        game_descriptions
-                            .get(*random_game)
-                            .map(|desc| desc.lines().collect())
+            if name.game_info.is_empty() {
+                // Gather descriptions
+                let desc_lines: Vec<&str> = if name.info {
+                    if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
+                        let games: Vec<&String> = game_descriptions.keys().collect();
+                        if let Some(random_game) = games.choose(&mut thread_rng()) {
+                            game_descriptions
+                                .get(*random_game)
+                                .map(|desc| desc.lines().collect())
+                        } else {
+                            None
+                        }
                     } else {
                         None
                     }
                 } else {
                     None
                 }
-            } else {
-                None
-            }
-            .unwrap_or_default();
-
-            // Call the appropriate drawing function based on the `under` flag
-            if name.info {
-                if name.under {
-                    draw_pokemon_art_under(art, desc_lines, name.padding_left, &config.language);
+                .unwrap_or_default();
+                // Call the appropriate drawing function based on the `under` flag
+                if name.info {
+                    if name.under {
+                        draw_pokemon_art_under(
+                            art,
+                            desc_lines,
+                            name.padding_left,
+                            &config.language,
+                        );
+                    } else {
+                        draw_pokemon_art(art, desc_lines, name.padding_left, &config.language);
+                    }
                 } else {
-                    draw_pokemon_art(art, desc_lines, name.padding_left, &config.language);
+                    print_ascii_art(art, name.padding_left);
                 }
             } else {
-                print_ascii_art(art, name.padding_left);
+                let desc_lines: Vec<&str> = if name.info {
+                    // Check if there are descriptions available for the specified language
+                    if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
+                        // Use name.game_info directly to fetch the specific game description
+                        if let Some(game_desc) = game_descriptions.get(&name.game_info) {
+                            // Collect lines of the game description
+                            game_desc.lines().collect()
+                        } else {
+                            Vec::new() // Return an empty vector if the game description is not found
+                        }
+                    } else {
+                        Vec::new() // Return an empty vector if there are no game descriptions for the language
+                    }
+                } else {
+                    Vec::new() // Return an empty vector if name.info is false
+                };
+
+                // Call the appropriate drawing function based on the `under` flag
+                if name.info {
+                    if name.under {
+                        draw_pokemon_art_under(
+                            art,
+                            desc_lines,
+                            name.padding_left,
+                            &config.language,
+                        );
+                    } else {
+                        draw_pokemon_art(art, desc_lines, name.padding_left, &config.language);
+                    }
+                } else {
+                    print_ascii_art(art, name.padding_left);
+                }
             }
         }
         _ => {
