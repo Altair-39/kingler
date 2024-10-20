@@ -15,109 +15,178 @@ _krabby() {
 
     local context curcontext="$curcontext" state line
     _arguments "${_arguments_options[@]}" : \
-        '-h[Print help]' \
-        '--help[Print help]' \
-        ":: :_krabby_commands" \
-        "*::: :->krabby" \
-    && ret=0
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_krabby_commands" \
+"*::: :->krabby" \
+&& ret=0
+    case $state in
+    (krabby)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:krabby-command-$line[1]:"
+        case $line[1] in
+            (init)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::bash:' \
+'::zsh:' \
+'::fish:' \
+'::powershell:' \
+'::elvish:' \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(name)
+_arguments "${_arguments_options[@]}" : \
+'-i[Print pokedex entry (if it exists)]' \
+'--info[Print pokedex entry (if it exists)]' \
+'-s[Show the shiny pokemon version instead]' \
+'--shiny[Show the shiny pokemon version instead]' \
+'--game-info[Choose a game for the pokedex entry]' \
+'--no-title[Do not display pokemon name]' \
+'--padding-left[Set amount of padding to the left \[default\: 0\]]' \
+'-u[Show the pokedex entry under the pokemon]' \
+'--under[Show the pokedex entry under the pokemon]' \
+'--stats[Show the pokemon stats]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::name -- Who'\''s that pokemon!?:' \
+&& ret=0
+;;
+(random)
+_arguments "${_arguments_options[@]}" : \
+'-i[Print pokedex entry (if it exists)]' \
+'--info[Print pokedex entry (if it exists)]' \
+'-s[Show the shiny pokemon version instead]' \
+'--shiny[Show the shiny pokemon version instead]' \
+'--game-info[Choose a game for the pokedex entry]' \
+'--no-title[Do not display pokemon name]' \
+'--padding-left[Set amount of padding to the left \[default\: 0\]]' \
+'-u[Show the pokedex entry under the pokemon]' \
+'--under[Show the pokedex entry under the pokemon]' \
+'--stats[Show the pokemon stats]' \
+'--no-mega[Do not show mega pokemon]' \
+'--no-gmax[Do not show gigantamax pokemon]' \
+'--no-regional[Do not show regional pokemon]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::GENERATIONS -- Generation number, range (1-9), or list of generations (1,3,6) \[default\: 1-9\]:' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_krabby__help_commands" \
+"*::: :->help" \
+&& ret=0
 
     case $state in
-        krabby)
-            words=($line[1] "${words[@]}")
-            (( CURRENT += 1 ))
-            curcontext="${curcontext%:*:*}:krabby-command-$line[1]:"
-            case $line[1] in
-                (init)
-                    _arguments "${_arguments_options[@]}" : \
-                        '-h[Print help]' \
-                        '--help[Print help]' \
-                        '::bash:' \
-                        '::zsh:' \
-                        '::fish:' \
-                        '::powershell:' \
-                        '::elvish:' \
-                    && ret=0
-                    ;;
-                (list)
-                    _arguments "${_arguments_options[@]}" : \
-                        '-h[Print help]' \
-                        '--help[Print help]' \
-                    && ret=0
-                    ;;
-                (name)
-                    _krabby_pokemon_names # Fetch Pokémon names for completion
-                    _arguments "${_arguments_options[@]}" : \
-                        '-i[Print pokedex entry (if it exists)]' \
-                        '--info[Print pokedex entry (if it exists)]' \
-                        '-s[Show the shiny pokemon version instead]' \
-                        '--shiny[Show the shiny pokemon version instead]' \
-                        '--no-title[Do not display pokemon name]' \
-                        '--padding-left[Set amount of padding to the left \[default\: 0\]]' \
-                        '-h[Print help]' \
-                        '--help[Print help]' \
-                        '::name -- Who'\''s that pokemon!?:' \
-                    && ret=0
-                    ;;
-                (random)
-                    _arguments "${_arguments_options[@]}" : \
-                        '-i[Print pokedex entry (if it exists)]' \
-                        '--info[Print pokedex entry (if it exists)]' \
-                        '-s[Show the shiny pokemon version instead]' \
-                        '--shiny[Show the shiny pokemon version instead]' \
-                        '--no-title[Do not display pokemon name]' \
-                        '--padding-left[Set amount of padding to the left \[default\: 0\]]' \
-                        '--no-mega[Do not show mega pokemon]' \
-                        '--no-gmax[Do not show gigantamax pokemon]' \
-                        '--no-regional[Do not show regional pokemon]' \
-                        '-h[Print help]' \
-                        '--help[Print help]' \
-                        '::GENERATIONS -- Generation number, range (1-9), or list of generations (1,3,6) \[default\: 1-9\]:' \
-                    && ret=0
-                    ;;
-                (help)
-                    _arguments "${_arguments_options[@]}" : \
-                        "::* :_krabby__help_commands" \
-                        "*::: :->help" \
-                    && ret=0
-                    ;;
-            esac
-            ;;
-    esac
-    return ret
-}
-
-# Fetch Pokémon names from PokéAPI
-_krabby_pokemon_names() {
-    local pokemon_names
-    # Fetch data from PokéAPI
-    pokemon_names=($(curl -s "https://pokeapi.co/api/v2/pokemon?limit=1000" | jq -r '.results[].name'))
-
-    # Use _describe to present them as completions
-    _describe -t pokemons 'pokemon names' pokemon_names
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:krabby-help-command-$line[1]:"
+        case $line[1] in
+            (init)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(name)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(random)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
 }
 
 (( $+functions[_krabby_commands] )) ||
 _krabby_commands() {
     local commands; commands=(
-        'init:Generate shell completions' \
-        'list:List all names of pokemons' \
-        'name:Select pokemon by name: eg. '\''pikachu'\''' \
-        'random:Show random pokemon' \
-        'help:Print this message or the help of the given subcommand(s)' \
+'init:Generate shell completions' \
+'list:List all names of pokemons' \
+'name:Select pokemon by name\: eg. '\''pikachu'\''' \
+'random:Show random pokemon' \
+'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'krabby commands' commands "$@"
 }
-
 (( $+functions[_krabby__help_commands] )) ||
 _krabby__help_commands() {
     local commands; commands=(
-        'init:Generate shell completions' \
-        'list:List all names of pokemons' \
-        'name:Select pokemon by name: eg. '\''pikachu'\''' \
-        'random:Show random pokemon' \
-        'help:Print this message or the help of the given subcommand(s)' \
+'init:Generate shell completions' \
+'list:List all names of pokemons' \
+'name:Select pokemon by name\: eg. '\''pikachu'\''' \
+'random:Show random pokemon' \
+'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'krabby help commands' commands "$@"
+}
+(( $+functions[_krabby__help__help_commands] )) ||
+_krabby__help__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'krabby help help commands' commands "$@"
+}
+(( $+functions[_krabby__help__init_commands] )) ||
+_krabby__help__init_commands() {
+    local commands; commands=()
+    _describe -t commands 'krabby help init commands' commands "$@"
+}
+(( $+functions[_krabby__help__list_commands] )) ||
+_krabby__help__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'krabby help list commands' commands "$@"
+}
+(( $+functions[_krabby__help__name_commands] )) ||
+_krabby__help__name_commands() {
+    local commands; commands=()
+    _describe -t commands 'krabby help name commands' commands "$@"
+}
+(( $+functions[_krabby__help__random_commands] )) ||
+_krabby__help__random_commands() {
+    local commands; commands=()
+    _describe -t commands 'krabby help random commands' commands "$@"
+}
+(( $+functions[_krabby__init_commands] )) ||
+_krabby__init_commands() {
+    local commands; commands=()
+    _describe -t commands 'krabby init commands' commands "$@"
+}
+(( $+functions[_krabby__list_commands] )) ||
+_krabby__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'krabby list commands' commands "$@"
+}
+(( $+functions[_krabby__name_commands] )) ||
+_krabby__name_commands() {
+    local commands; commands=()
+    _describe -t commands 'krabby name commands' commands "$@"
+}
+(( $+functions[_krabby__random_commands] )) ||
+_krabby__random_commands() {
+    local commands; commands=()
+    _describe -t commands 'krabby random commands' commands "$@"
 }
 
 if [ "$funcstack[1]" = "_krabby" ]; then
@@ -125,4 +194,3 @@ if [ "$funcstack[1]" = "_krabby" ]; then
 else
     compdef _krabby krabby
 fi
-

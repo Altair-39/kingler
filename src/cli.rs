@@ -6,8 +6,11 @@ pub fn build() -> Command {
     let common_args = [
         arg!(-i --info "Print pokedex entry (if it exists)"),
         arg!(-s --shiny "Show the shiny pokemon version instead"),
+        arg!(--"game-info" "Choose a game for the pokedex entry"),
         arg!(--"no-title" "Do not display pokemon name"),
         arg!(--"padding-left" "Set amount of padding to the left [default: 0]"),
+        arg!(-u --under "Show the pokedex entry under the pokemon"),
+        arg!(--stats "Show the pokemon stats"),
     ];
     let init = Command::new("init")
         .about("Generate shell completions")
