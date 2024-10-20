@@ -8,7 +8,7 @@ def fetch_pokemon_data():
     pokemon_data = []
 
     # Fetch data for all Pokémon
-    for id in range(1, 1009):  # 1008 is the total number of Pokémon as of now
+    for id in range(1, 1026):
         # Fetch basic Pokémon data
         response = requests.get(f"{base_url}{id}")
         if response.status_code == 200:
@@ -21,28 +21,30 @@ def fetch_pokemon_data():
             if species_response.status_code == 200:
                 species_data = species_response.json()
 
-                # Collect flavor text for English game versions only
-                game_descriptions = {}
+                language_descriptions = {}
                 for entry in species_data['flavor_text_entries']:
                     # Get the language of the entry
                     language = entry['language']['name']
-                    if language == 'en':  # Check if the language is English
-                        version = entry['version']['name']  # Get the game version
-                        flavor_text = entry['flavor_text'].replace(
-                            '\n', ' ').replace('\f', ' ')  # Clean up the text
-                        # Add the flavor text to the respective game version
-                        if version not in game_descriptions:
-                            game_descriptions[version] = flavor_text
+                    version = entry['version']['name']  # Get the game version
+                    flavor_text = entry['flavor_text'].replace(
+                        '\n', ' ').replace('\f', ' ')  # Clean up the text
+
+                    # Initialize the language entry if it doesn't exist
+                    if language not in language_descriptions:
+                        language_descriptions[language] = {}
+
+                    # Store the flavor text based on the version
+                    language_descriptions[language][version] = flavor_text
 
                 # Create Pokémon info dictionary
                 pokemon_info = {
                     "idx": idx,
                     "slug": slug,
-                    "gen": (idx - 1) // 100 + 1,  # Calculate generation
+                    "gen": (idx - 1) // 100 + 1,
                     "name": {
                         "en": slug.capitalize(),  # Capitalize slug for the English name
                     },
-                    "desc": game_descriptions,  # Use descriptions by game version
+                    "desc": language_descriptions,  # Use descriptions by language
                     "forms": [],  # Placeholder for forms
                 }
                 pokemon_data.append(pokemon_info)
@@ -57,10 +59,10 @@ def fetch_pokemon_data():
 
 def main():
     all_pokemon = fetch_pokemon_data()
-    # Now, instead of wrapping in a dictionary, we write the list directly
+
     with open('pokemon.json', 'w') as json_file:
-        json.dump(all_pokemon, json_file, indent=4)  # Write list directly
-    print("Pokédex data saved to pokedex.json")
+        json.dump(all_pokemon, json_file, indent=4)
+    print("Pokédex data saved to pokemon.json")
 
 
 if __name__ == "__main__":
