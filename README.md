@@ -183,10 +183,12 @@ shiny_rate = 0.0078125
 ## Credits
 The pokemon sprites for kingler were generated using sprites from [PokéSprite](https://msikma.github.io/pokesprite/)
 and converted to unicode using Phoney Badger's [pokemon-generator-scripts](https://gitlab.com/phoneybadger/pokemon-generator-scripts).
+The code that got me started is from yannjor's [krabby](https://github.com/yannjor/krabby) 
 The pokemon data was obtained from [PokéAPI](https://github.com/PokeAPI/pokeapi).
 
 
 ## Similar projects
 - [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
+- [krabby](https://github.com/yannjor/krabby)
 - [pokeget](https://github.com/talwat/pokeget)
 - [pokeshell](https://github.com/acxz/pokeshell)
