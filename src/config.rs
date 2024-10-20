@@ -21,7 +21,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            language: "en".to_string(),
+            language: "black".to_string(),
             shiny_rate: 1.0 / 128.0,
         }
     }

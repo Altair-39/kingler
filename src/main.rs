@@ -106,56 +106,6 @@ fn list_pokemon_names(pokemon_db: Vec<Pokemon>) {
     pokemon_db.iter().for_each(|p| println!("{}", p.slug));
 }
 
-fn show_pokemon_by_name(
-    name: &Name,
-    pokemon_db: Vec<Pokemon>,
-    config: &Config,
-) -> Result<(), Error> {
-    match pokemon_db.iter().find(|p| p.slug == name.name) {
-        Some(pokemon) => {
-            let slug = if name.form == "regular" {
-                name.name.clone()
-            } else {
-                format!("{}-{}", name.name, name.form)
-            };
-            let art_path = if name.shiny {
-                format!("colorscripts/shiny/{}", slug)
-            } else {
-                format!("colorscripts/regular/{}", slug)
-            };
-            let art = Asset::get(&art_path)
-                .unwrap_or_else(|| panic!("Could not read pokemon art of '{}'", slug))
-                .data;
-            let art = str::from_utf8(&art).expect("Invalid UTF-8 in pokemon art");
-            if !name.no_title {
-                let pokemon_name = match pokemon.name.get(&config.language) {
-                    Some(n) => n,
-                    None => return Err(Error::InvalidLanguage(config.language.clone())),
-                };
-                print!("{: <1$}{pokemon_name}", "", name.padding_left);
-                match name.form.as_str() {
-                    "regular" => println!(),
-                    other => println!(" ({other})"),
-                }
-            }
-            if name.info {
-                if let Some(description) = pokemon.desc.get(&config.language) {
-                    description
-                        .lines()
-                        .for_each(|line| println!("{: <1$}{line}", "", name.padding_left))
-                }
-            }
-            println!();
-            art.lines()
-                .for_each(|line| println!("{: <1$}{line}", "", name.padding_left))
-        }
-        None => {
-            return Err(Error::InvalidPokemon(name.name.clone()));
-        }
-    }
-    Ok(())
-}
-
 fn show_random_pokemon(
     random: &Random,
     pokemon_db: Vec<Pokemon>,
@@ -163,7 +113,7 @@ fn show_random_pokemon(
 ) -> Result<(), Error> {
     let (start_gen, end_gen) = match random.generations.split_once('-') {
         Some(gens) => gens,
-        None => {
+        _none => {
             let gen_list = random.generations.split(',').collect::<Vec<_>>();
             let gen = gen_list.choose(&mut rand::thread_rng()).unwrap();
             (*gen, *gen)
@@ -190,6 +140,7 @@ fn show_random_pokemon(
 
     let mut forms = vec!["regular".to_string()];
     forms.extend_from_slice(&pokemon.forms);
+
     // Optional filters
     if random.no_mega {
         forms.retain(|f| !["mega", "mega-x", "mega-y"].contains(&f.as_str()));
@@ -200,7 +151,8 @@ fn show_random_pokemon(
     if random.no_regional {
         forms.retain(|f| !["alola", "galar", "hisui", "paldea"].contains(&f.as_str()));
     }
-    // forms will never be empty, so safe to unwrap
+
+    // Choose a form to show
     let form = forms.choose(&mut rand::thread_rng()).unwrap();
     let shiny = rand::thread_rng().gen_bool(config.shiny_rate) || random.shiny;
 
@@ -209,13 +161,70 @@ fn show_random_pokemon(
             name: pokemon.slug.clone(),
             form: form.to_string(),
             shiny,
-            info: random.info,
+            info: true, // Set to true to always show info
             no_title: random.no_title,
             padding_left: random.padding_left,
         },
         pokemon_db,
         config,
     )
+}
+
+fn show_pokemon_by_name(
+    name: &Name,
+    pokemon_db: Vec<Pokemon>,
+    config: &Config,
+) -> Result<(), Error> {
+    match pokemon_db.iter().find(|p| p.slug == name.name) {
+        Some(pokemon) => {
+            let slug = if name.form == "regular" {
+                name.name.clone()
+            } else {
+                format!("{}-{}", name.name, name.form)
+            };
+            let art_path = if name.shiny {
+                format!("colorscripts/shiny/{}", slug)
+            } else {
+                format!("colorscripts/regular/{}", slug)
+            };
+            let art = Asset::get(&art_path)
+                .unwrap_or_else(|| panic!("Could not read pokemon art of '{}'", slug))
+                .data;
+            let art = str::from_utf8(&art).expect("Invalid UTF-8 in pokemon art");
+            if !name.no_title {
+                let pokemon_name = match pokemon.name.get(&config.language) {
+                    Some(n) => n,
+                    _none => return Err(Error::InvalidLanguage(config.language.clone())),
+                };
+                print!("{: <1$}{pokemon_name}", "", name.padding_left);
+                match name.form.as_str() {
+                    "regular" => println!(),
+                    other => println!(" ({other})"),
+                }
+            }
+
+            println!();
+            art.lines()
+                .for_each(|line| println!("{: <1$}{line}", "", name.padding_left));
+
+            if name.info {
+                let languages: Vec<&String> = pokemon.desc.keys().collect();
+
+                if let Some(random_language) = languages.choose(&mut rand::thread_rng()) {
+                    if let Some(description) = pokemon.desc.get(*random_language) {
+                        let lines: Vec<&str> = description.lines().collect();
+                        if let Some(random_line) = lines.choose(&mut rand::thread_rng()) {
+                            println!("{: <1$}{random_line}", "", name.padding_left);
+                        }
+                    }
+                }
+            }
+        }
+        _none => {
+            return Err(Error::InvalidPokemon(name.name.clone()));
+        }
+    }
+    Ok(())
 }
 
 fn main() -> Result<(), Error> {
