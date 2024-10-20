@@ -30,9 +30,12 @@ with some extra features.
 - Configuration file, right now only for language and shiny rate
 
 ### This fork
-- The text of the pokedex entry was moved under the sprite
-- The text of the pokedex entry is random with every description of every games about that pokemon, but you can choose the language
+- The text of the pokedex entry was moved. With the right flag you can choose if you want it under the pokemon or alongside
+- There are more pokedex description: every description of every games about that pokemon, you can choose the language and
+  the game
 - It is added a script for scraping of the pokemon API so everyone can create a custom JSON
+- Custom shell completions
+
 
 ## Installation
 
