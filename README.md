@@ -1,7 +1,7 @@
 # kingler
 
 ![Crates.io version](https://img.shields.io/crates/v/kingler)
-![AUR version](https://img.shields.io/aur/version/kingler-bin)
+![AUR version](https://img.shields.io/aur/version/kingler-bin?v=1)
 
 Kingler is an enhanced version of Krabby [krabby](https://github.com/yannjor/krabby) that is mostly a Rust rewrite of phoney badger's [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
 with some extra features.
