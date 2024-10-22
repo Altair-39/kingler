@@ -30,7 +30,7 @@ impl Config {
     pub fn load() -> Result<Self, Error> {
         let config_dir = match dirs::config_dir() {
             Some(dir) => dir.join(BINARY_NAME),
-            None => {
+            _none => {
                 return Err(Error::Configuration(
                     "Failed to get config directory".to_string(),
                 ))

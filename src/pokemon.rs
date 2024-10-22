@@ -21,3 +21,7 @@ pub fn load_pokemon(pokemon_db: &EmbeddedFile) -> Result<Vec<Pokemon>, Error> {
     let pokemon: Vec<Pokemon> = serde_json::from_str(pokemon_json_str)?;
     Ok(pokemon)
 }
+
+pub fn list_pokemon_names(pokemon_db: Vec<Pokemon>) {
+    pokemon_db.iter().for_each(|p| println!("{}", p.slug));
+}
