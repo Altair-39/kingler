@@ -23,6 +23,21 @@ use std::str;
 #[folder = "assets/"]
 struct Asset;
 
+/// Shows a random Pokémon based on user-defined criteria such as generation range, forms, and shiny status.
+///
+/// This function filters the Pokémon database according to the specified generation range
+/// and other preferences provided by the user. It randomly selects a Pokémon that meets
+/// these criteria and prepares its representation, including potential shiny variants and
+/// form variations. Finally, it calls another function to display the chosen Pokémon's information.
+///
+/// # Parameters
+/// - `random`: A reference to the `cli::Random` struct containing user preferences for random Pokémon selection.
+/// - `pokemon_db`: A vector of `Pokemon` objects representing the entire Pokémon database.
+/// - `config`: A reference to the `Config` struct containing configuration settings such as shiny rate.
+///
+/// # Returns
+/// - `Result<(), Error>`: Returns an `Ok(())` if successful, or an `Error` if any issues occur
+///   during the filtering or selection process.
 fn show_random_pokemon(
     random: &cli::Random,
     pokemon_db: Vec<Pokemon>,
@@ -105,6 +120,23 @@ fn show_random_pokemon(
     )
 }
 
+/// Displays information about a Pokémon based on its name and specified form.
+///
+/// This function searches for a Pokémon in the database using its slug (name).
+/// If found, it retrieves and displays the Pokémon's ASCII art, potential
+/// descriptions, and stats if requested. The function handles shiny variants
+/// and different forms of the Pokémon, as well as optional titles and game
+/// information based on user input.
+///
+/// # Parameters
+/// - `name`: A reference to the `cli::Name` struct containing the Pokémon's name,
+///   form, shiny status, and other display preferences.
+/// - `pokemon_db`: A vector of `Pokemon` objects representing the entire Pokémon database.
+/// - `config`: A reference to the `Config` struct containing configuration settings such as language.
+///
+/// # Returns
+/// - `Result<(), Error>`: Returns `Ok(())` if the Pokémon is successfully found and displayed,
+///   or an `Error` if the Pokémon is not found, the language is invalid, or other issues occur.
 fn show_pokemon_by_name(
     name: &cli::Name,
     pokemon_db: Vec<Pokemon>,

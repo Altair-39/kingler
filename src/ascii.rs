@@ -1,3 +1,16 @@
+/// Draws an ASCII art representation of a Pokémon, aligning the description next to the art.
+///
+/// The function displays the provided ASCII art and aligns the given description text
+/// next to the art. The description starts from a calculated index based on the
+/// midpoint of the ASCII art. If there are no descriptions, a message indicating
+/// the lack of descriptions for the specified language is displayed.
+///
+/// # Arguments
+///
+/// * `art` - A string slice that holds the ASCII art to be displayed.
+/// * `desc_lines` - A vector of string slices containing the description lines to be shown next to the art.
+/// * `padding_left` - The number of spaces to pad to the left of each line of art.
+/// * `language` - The language of the description; used in the message when no descriptions are available.
 pub fn draw_pokemon_art(art: &str, desc_lines: Vec<&str>, padding_left: usize, language: &str) {
     let lines: Vec<&str> = art.lines().collect();
     let desc_width = desc_lines.iter().map(|line| line.len()).max().unwrap_or(0);
@@ -40,6 +53,18 @@ pub fn draw_pokemon_art(art: &str, desc_lines: Vec<&str>, padding_left: usize, l
     }
 }
 
+/// Draws an ASCII art representation of a Pokémon, displaying the description below the art.
+///
+/// The function displays the provided ASCII art and shows the given description
+/// text below it. If no descriptions are available, a message indicating the lack
+/// of descriptions for the specified language is displayed.
+///
+/// # Arguments
+///
+/// * `art` - A string slice that holds the ASCII art to be displayed.
+/// * `desc_lines` - A vector of string slices containing the description lines to be shown below the art.
+/// * `padding_left` - The number of spaces to pad to the left of each line of art.
+/// * `language` - The language of the description; used in the message when no descriptions are available.
 pub fn draw_pokemon_art_under(
     art: &str,
     desc_lines: Vec<&str>,
@@ -70,6 +95,15 @@ pub fn draw_pokemon_art_under(
     }
 }
 
+/// Prints an ASCII art representation of a Pokémon with optional left padding.
+///
+/// The function simply displays the provided ASCII art with each line padded
+/// to the left by the specified number of spaces.
+///
+/// # Arguments
+///
+/// * `art` - A string slice that holds the ASCII art to be displayed.
+/// * `padding_left` - The number of spaces to pad to the left of each line of art.
 pub fn print_ascii_art(art: &str, padding_left: usize) {
     for line in art.lines() {
         print!("{: <1$}", line, padding_left);
