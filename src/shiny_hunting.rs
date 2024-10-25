@@ -6,7 +6,7 @@ use std::io::{self, Write};
 pub struct ShinyLogEntry {
     pub pokemon_name: String,
     pub form: String,
-    pub date: String, // Keep this as String for JSON serialization
+    pub date: String,
     pub details: String,
 }
 
@@ -27,7 +27,7 @@ pub fn log_shiny_capture(log_path: &str, entry: &ShinyLogEntry) -> io::Result<()
     let mut entries: Vec<ShinyLogEntry> = serde_json::from_str(&data)?;
 
     // Add the new entry
-    entries.push(entry.clone()); // Add the new entry
+    entries.push(entry.clone());
 
     // Write back the updated JSON array
     let updated_data = serde_json::to_string_pretty(&entries)?;
