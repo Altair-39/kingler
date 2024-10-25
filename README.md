@@ -9,8 +9,7 @@ with some extra features.
 ![](https://art.pixilart.com/4cd54b1841a761c.png)
 
 ## Table of contents
-* [Features](#features)
-  * [This fork](#this-fork)
+* [Features of Kingler](#features)
 * [Installation](#installation)
   * [Arch Linux x86_64 (and derivatives)](#arch-linux-x86_64-and-derivatives)
   * [Ubuntu/Debian x86_64 (and derivatives)](#ubuntudebian-x86_64-and-derivatives)
