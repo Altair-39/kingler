@@ -17,8 +17,20 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use rand::Rng;
 use rust_embed::RustEmbed;
+use serde::Deserialize;
+use serde::Serialize;
 
 use std::str;
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct EncounteredPokemon {
+    name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct EncounteredPokemonTracker {
+    encounters: Vec<EncounteredPokemon>,
+}
 
 #[derive(RustEmbed)]
 #[folder = "assets/"]
@@ -37,6 +49,65 @@ fn display_shiny_log(log_path: &str) -> Result<(), Error> {
     Ok(())
 }
 
+fn track_encounter(tracker_path: &str, pokemon_name: &str) -> Result<(), Error> {
+    // Load existing encounters
+    let mut tracker = if let Ok(file_content) = std::fs::read_to_string(tracker_path) {
+        serde_json::from_str::<EncounteredPokemonTracker>(&file_content)
+            .unwrap_or(EncounteredPokemonTracker { encounters: vec![] })
+    } else {
+        EncounteredPokemonTracker { encounters: vec![] }
+    };
+
+    // Prepare the new encounter
+    let new_encounter = EncounteredPokemon {
+        name: pokemon_name.to_string(),
+    };
+
+    // Check if the Pokémon has already been encountered
+    if !tracker
+        .encounters
+        .iter()
+        .any(|e| e.name == new_encounter.name)
+    {
+        // Add the new encounter to the tracker
+        tracker.encounters.push(new_encounter);
+
+        // Save the updated tracker back to the file
+        let json = serde_json::to_string(&tracker)?;
+        std::fs::write(tracker_path, json)?;
+    } else {
+        println!("{} has already been encountered.", pokemon_name);
+    }
+
+    Ok(())
+}
+
+fn show_completion_status(tracker_path: &str, total_pokemon: usize) -> Result<(), Error> {
+    // Load existing encounters
+    let tracker = if let Ok(file_content) = std::fs::read_to_string(tracker_path) {
+        serde_json::from_str::<EncounteredPokemonTracker>(&file_content)
+            .unwrap_or(EncounteredPokemonTracker { encounters: vec![] })
+    } else {
+        EncounteredPokemonTracker { encounters: vec![] }
+    };
+
+    let unique_count = tracker.encounters.len();
+
+    // Calculate the percentage of the Pokédex completion
+    let completion_percentage = if total_pokemon > 0 {
+        (unique_count as f64 / total_pokemon as f64) * 100.0
+    } else {
+        0.0
+    };
+
+    println!("You have encountered {} unique Pokémon.", unique_count);
+    println!(
+        "Pokedex completion: {:.2}% ({} out of {})",
+        completion_percentage, unique_count, total_pokemon
+    );
+
+    Ok(())
+}
 /// Shows a random Pokémon based on user-defined criteria such as generation range, forms, and shiny status.
 ///
 /// This function filters the Pokémon database according to the specified generation range
@@ -86,6 +157,15 @@ fn show_random_pokemon(
         Some(&p) => p,
         None => return Err(Error::InvalidGeneration(random.generations.clone())),
     };
+
+    // After determining the selected Pokémon
+    let selected_pokemon_name = match selected_pokemon.name.get(&config.language) {
+        Some(name) => name.clone(),
+        None => return Err(Error::InvalidLanguage(config.language.clone())),
+    };
+
+    // Track the encounter
+    track_encounter("pokedex.json", &selected_pokemon_name)?;
 
     // Prepare forms to choose from
     let mut forms = vec!["regular".to_string()];
@@ -310,6 +390,7 @@ fn main() -> Result<(), Error> {
         cli::Commands::Name(name) => show_pokemon_by_name(&name, pokemon, &config)?,
         cli::Commands::Random(random) => show_random_pokemon(&random, pokemon, &config)?,
         cli::Commands::ShowShiny => display_shiny_log(&config.shiny_log_path)?,
+        cli::Commands::ShowCompletion => show_completion_status("pokedex.json", 1025)?,
     }
 
     Ok(())

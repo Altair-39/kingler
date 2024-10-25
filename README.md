@@ -27,6 +27,7 @@ with some extra features.
 - Print pokemon by name
 - Print pokedex entry together with the sprite
 - "Catch" the shiny and display your collection
+- Show pokedex progression
 - Configuration file, for language, shiny rate and shiny hunting JSON
 - The text of the pokedex entry was moved. With the right flag you can choose if you want it under the pokemon or alongside
 - There are more pokedex description: every description of every games about that pokemon, you can choose the language and

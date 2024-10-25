@@ -147,6 +147,8 @@ pub enum Commands {
     Init(crate::cli::ShellName),
     /// Show shiny
     ShowShiny,
+    /// Show pokedex completions
+    ShowCompletion,
 }
 
 /// Builds the command structure for the CLI, including subcommands and common arguments.
