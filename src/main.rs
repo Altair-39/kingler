@@ -4,6 +4,7 @@ mod config;
 mod description;
 mod error;
 mod pokemon;
+mod shiny_hunting;
 mod stats;
 
 use config::Config;
@@ -22,6 +23,19 @@ use std::str;
 #[derive(RustEmbed)]
 #[folder = "assets/"]
 struct Asset;
+
+fn display_shiny_log(log_path: &str) -> Result<(), Error> {
+    let log_entries = shiny_hunting::load_shiny_log(log_path)?;
+
+    for entry in log_entries {
+        println!(
+            "{}: {} {} - {}",
+            entry.date, entry.pokemon_name, entry.form, entry.details
+        );
+    }
+
+    Ok(())
+}
 
 /// Shows a random Pokémon based on user-defined criteria such as generation range, forms, and shiny status.
 ///
@@ -45,8 +59,8 @@ fn show_random_pokemon(
 ) -> Result<(), Error> {
     // Determine generation range
     let (start_gen, end_gen) = match random.generations.split_once('-') {
-        Some(gens) => gens,
-        _none => {
+        Some((start, end)) => (start, end),
+        None => {
             let gen_list = random.generations.split(',').collect::<Vec<_>>();
             let gen = gen_list.choose(&mut rand::thread_rng()).unwrap_or(&"1");
             (*gen, *gen) // Dereference to convert to (&str, &str)
@@ -68,14 +82,14 @@ fn show_random_pokemon(
         .collect();
 
     // Check if there are any Pokémon available after filtering
-    let pokemon = match pokemon.choose(&mut rand::thread_rng()) {
+    let selected_pokemon = match pokemon.choose(&mut rand::thread_rng()) {
         Some(&p) => p,
-        _none => return Err(Error::InvalidGeneration(random.generations.clone())),
+        None => return Err(Error::InvalidGeneration(random.generations.clone())),
     };
 
     // Prepare forms to choose from
     let mut forms = vec!["regular".to_string()];
-    forms.extend(pokemon.forms.iter().cloned());
+    forms.extend(selected_pokemon.forms.iter().cloned());
 
     // Apply optional filters
     if random.no_mega {
@@ -94,7 +108,31 @@ fn show_random_pokemon(
         .choose(&mut rand::thread_rng())
         .unwrap_or(&default_form); // Use a reference to the long-lived string
 
+    // Determine if the Pokémon is shiny
     let shiny = rand::thread_rng().gen_bool(config.shiny_rate) || random.shiny;
+
+    // Log shiny captures if shiny is true
+    if shiny {
+        // Clone the pokemon_name here to avoid ownership issues
+        let pokemon_name = match selected_pokemon.name.get(&config.language) {
+            Some(name) => name.clone(),
+            None => return Err(Error::InvalidLanguage(config.language.clone())),
+        };
+
+        // Create a shiny log entry with formatted date
+        let now = chrono::Local::now(); // Get the current local date and time
+        let date = now.format("%d-%m-%Y %H:%M").to_string(); // Format the date
+
+        let shiny_entry = shiny_hunting::ShinyLogEntry {
+            pokemon_name: pokemon_name.clone(), // Clone here for the log entry
+            form: form.to_string(),
+            date, // Use the formatted date here
+            details: format!("Encountered shiny {} {}!", pokemon_name, form),
+        };
+
+        // Log the shiny capture
+        shiny_hunting::log_shiny_capture(&config.shiny_log_path, &shiny_entry)?;
+    }
 
     // Pass the active game if `game_info` is present; otherwise, default to an empty string
     let game_name = if random.game_info.is_empty() {
@@ -103,9 +141,10 @@ fn show_random_pokemon(
         random.game_info.clone()
     };
 
+    // Show Pokémon information
     show_pokemon_by_name(
         &cli::Name {
-            name: pokemon.slug.clone(),
+            name: selected_pokemon.slug.clone(),
             form: form.to_string(),
             shiny,
             info: random.info,
@@ -117,7 +156,9 @@ fn show_random_pokemon(
         },
         pokemon_db,
         config,
-    )
+    )?;
+
+    Ok(())
 }
 
 /// Displays information about a Pokémon based on its name and specified form.
@@ -268,6 +309,7 @@ fn main() -> Result<(), Error> {
         cli::Commands::List => pokemon::list_pokemon_names(pokemon),
         cli::Commands::Name(name) => show_pokemon_by_name(&name, pokemon, &config)?,
         cli::Commands::Random(random) => show_random_pokemon(&random, pokemon, &config)?,
+        cli::Commands::ShowShiny => display_shiny_log(&config.shiny_log_path)?,
     }
 
     Ok(())

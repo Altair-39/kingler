@@ -145,6 +145,8 @@ pub enum Commands {
     Random(crate::cli::Random),
     /// Generate shell completions
     Init(crate::cli::ShellName),
+    /// Show shiny
+    ShowShiny,
 }
 
 /// Builds the command structure for the CLI, including subcommands and common arguments.

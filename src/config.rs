@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use dirs::home_dir;
+
 use std::env;
 use std::fs;
 use std::io::ErrorKind::NotFound;
@@ -17,14 +19,33 @@ pub struct Config {
 
     /// The probability of displaying a shiny Pokémon with the random command.
     pub shiny_rate: f64,
+
+    /// The path to the file with the shiny catched
+    pub shiny_log_path: String,
 }
 
 /// Provides default values for the configuration settings.
 impl Default for Config {
     fn default() -> Self {
+        // Construct the default path for the shiny log file
+        let shiny_log_path = match home_dir() {
+            Some(mut path) => {
+                path.push(".config"); // Ensure you are in the config directory
+                fs::create_dir_all(&path).expect("Failed to create config directory"); // Ensure the directory exists
+                path.push("kingler"); // Add your application-specific directory
+                fs::create_dir_all(&path).expect("Failed to create kingler directory"); // Ensure this directory exists
+                path.push("shiny_log.json"); // Set the filename for the log
+                path.to_str()
+                    .expect("Failed to convert path to string")
+                    .to_string() // Convert PathBuf to String
+            }
+            None => "shiny_log.json".to_string(), // Fallback if home directory cannot be determined
+        };
+
         Self {
             language: "en".to_string(), // Default language is English.
-            shiny_rate: 1.0 / 128.0,    // Default shiny rate is 1 in 128.
+            shiny_rate: 3.0 / 4096.0,   // Default shiny rate is 1 in 128.
+            shiny_log_path,             // Use the constructed path
         }
     }
 }

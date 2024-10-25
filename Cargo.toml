@@ -19,6 +19,8 @@ serde_json = "1.0.128"
 rand = "0.8.5"
 rust-embed = "8.5.0"
 thiserror = "1.0.64"
+chrono = "0.4" 
+
 # Config
 dirs = "5.0.1"
 toml = "0.8.19"
