@@ -22,14 +22,13 @@ with some extra features.
 * [Similar projects](#similar-projects)
 
 
-## Features of Krabby
+## Features of Kingler
 - Pokemon from every generation, including shinies, megas, gigantamax, and regional variants
 - Print random pokemon (with filters for generations and different forms)
 - Print pokemon by name
 - Print pokedex entry together with the sprite
-- Configuration file, right now only for language and shiny rate
-
-### This fork
+- "Catch" the shiny and display your collection
+- Configuration file, for language, shiny rate and shiny hunting JSON
 - The text of the pokedex entry was moved. With the right flag you can choose if you want it under the pokemon or alongside
 - There are more pokedex description: every description of every games about that pokemon, you can choose the language and
   the game
@@ -91,24 +90,19 @@ export PATH="$PATH:$HOME/.cargo/bin"
 Run the help command `kingler help` to see the following help message.
 
 ```
-USAGE:
-    kingler <SUBCOMMAND>
+Usage: kingler <COMMAND>
 
-OPTIONS:
-    -h, --help       Print help information
-    -V, --version    Print version information
+Commands:
+  list        Print a list of all Pokémon
+  name        Select Pokémon by name. Generally spelled like in the games. A few exceptions are nidoran-f, nidoran-m, mr-mime, farfetchd, flabebe type-null etc. Perhaps grep the output of list if in doubt
+  random      Show a random Pokémon. This command can optionally be followed by a generation number or range (1-9) to show random Pokémon from a specific generation or range of generations. The generations can be provided as a continuous range (e.g., 1-3) or as a list of generations (1,3,6)
+  init        Generate shell completions
+  show-shiny  Show shiny
+  help        Print this message or the help of the given subcommand(s)
 
-SUBCOMMANDS:
-    init      Obtain self completions
-    help      Print this message or the help of the given subcommand(s)
-    list      Print list of all pokemon
-    name      Select pokemon by name. Generally spelled like in the games. A few exceptions are
-                  nidoran-f, nidoran-m, mr-mime, farfetchd, flabebe type-null etc. Perhaps grep the
-                  output of list if in doubt
-    random    Show a random pokemon. This command can optionally be followed by a generation
-                  number or range (1-9) to show random pokemon from a specific generation or range
-                  of generations. The generations can be provided as a continuous range (eg. 1-3) or
-                  as a list of generations (1,3,6)
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 To get more detailed information about a subcommand you can also view its help, for example
 ```
@@ -161,7 +155,10 @@ Print a random pokemon with stats and info under
 ```
 kingler random -iu --stats
 ```
-
+Print the list of shiny pokemon "catch"
+```
+kingler show-shiny
+```
 ## Configuration
 When the program is run, a TOML config file will automatically be created in the user's config
 directory (usually `~/.config`) under `kingler/config.toml` if it doesn't exist already. 
