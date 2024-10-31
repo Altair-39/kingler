@@ -455,7 +455,7 @@ fn main() -> Result<(), Error> {
         cli::Commands::Random(random) => show_random_pokemon(&random, pokemon, &config)?,
         cli::Commands::ShowShiny => display_shiny_log(&config.shiny_log_path)?,
         cli::Commands::ShowCompletion => {
-            show_completion_status(".config/kingler/pokedex.json", 1025)?
+            show_completion_status(pokedex_path.to_str().expect("None"), 1025)?
         }
     }
 
