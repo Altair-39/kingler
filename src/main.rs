@@ -20,6 +20,10 @@ use rust_embed::RustEmbed;
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::fs;
+use std::io;
+use std::io::Write;
+use std::path::PathBuf;
 use std::str;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -164,9 +168,14 @@ fn show_random_pokemon(
         None => return Err(Error::InvalidLanguage(config.language.clone())),
     };
 
+    let pokedex_path = get_pokedex_path()?;
     // Track the encounter
-    track_encounter("pokedex.json", &selected_pokemon_name)?;
-
+    track_encounter(
+        pokedex_path
+            .to_str()
+            .expect("Failed to convert PathBuf to str"),
+        &selected_pokemon_name,
+    )?;
     // Prepare forms to choose from
     let mut forms = vec!["regular".to_string()];
     forms.extend(selected_pokemon.forms.iter().cloned());
@@ -378,19 +387,76 @@ fn show_pokemon_by_name(
     Ok(())
 }
 
+fn get_pokedex_path() -> Result<PathBuf, io::Error> {
+    if let Some(mut path) = dirs::home_dir() {
+        // Attempt to create .config directory
+        path.push(".config");
+        if let Err(e) = fs::create_dir_all(&path) {
+            eprintln!("Failed to create .config directory: {}", e);
+            return Err(e);
+        }
+
+        // Attempt to create kingler directory
+        path.push("kingler");
+        if let Err(e) = fs::create_dir_all(&path) {
+            eprintln!("Failed to create kingler directory: {}", e);
+            return Err(e);
+        }
+
+        // Add the file name for the Pokedex
+        path.push("pokedex.json");
+
+        Ok(path)
+    } else {
+        eprintln!("Home directory could not be determined. Defaulting to local path.");
+        Ok(PathBuf::from("pokedex.json"))
+    }
+}
+
+/// Ensures that the `.config/kingler/pokedex.json` file exists and is initialized
+/// with an empty `EncounteredPokemonTracker` structure if not already present.
+///
+/// # Parameters
+/// - `tracker_path`: The path to the `pokedex.json` tracker file.
+///
+/// # Returns
+/// - `Result<(), Error>`: Returns `Ok(())` if the file is successfully initialized or already exists,
+///   or an `Error` if any issues occur during initialization.
+fn initialize_tracker(tracker_path: &PathBuf) -> Result<(), Error> {
+    // Ensure the directory exists
+    let tracker_dir = tracker_path.parent().unwrap();
+    fs::create_dir_all(tracker_dir)?;
+
+    // Check if the tracker file exists; if not, create it with a default empty tracker
+    if !tracker_path.exists() {
+        let empty_tracker = EncounteredPokemonTracker { encounters: vec![] };
+        let json = serde_json::to_string(&empty_tracker)?;
+        let mut file = fs::File::create(tracker_path)?;
+        file.write_all(json.as_bytes())?;
+    }
+
+    Ok(())
+}
+
 fn main() -> Result<(), Error> {
     let config = Config::load()?;
     let pokemon_db = Asset::get("pokemon.json").expect("Could not read pokemon db file");
     let pokemon = load_pokemon(&pokemon_db)?;
     let args = cli::Cli::parse();
+    // Construct the tracker path starting from the user's home directory
+    let pokedex_path = get_pokedex_path()?;
 
+    // Ensure the directory and file exist with proper initialization
+    initialize_tracker(&pokedex_path)?;
     match args.command {
         cli::Commands::Init(shell) => cli::print_completions(shell.shell, &mut cli::build()),
         cli::Commands::List => pokemon::list_pokemon_names(pokemon),
         cli::Commands::Name(name) => show_pokemon_by_name(&name, pokemon, &config)?,
         cli::Commands::Random(random) => show_random_pokemon(&random, pokemon, &config)?,
         cli::Commands::ShowShiny => display_shiny_log(&config.shiny_log_path)?,
-        cli::Commands::ShowCompletion => show_completion_status("pokedex.json", 1025)?,
+        cli::Commands::ShowCompletion => {
+            show_completion_status(".config/kingler/pokedex.json", 1025)?
+        }
     }
 
     Ok(())

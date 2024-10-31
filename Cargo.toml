@@ -1,6 +1,6 @@
 [package]
 name = "kingler"
-version = "0.3.3"
+version = "0.4.0"
 authors = ["Altair"]
 description = "Print pokemon sprites in your terminal"
 edition = "2021"
@@ -13,15 +13,15 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 # Cli
-clap = { version = "4.5.18", features = ["derive"] }
-serde = { version = "1.0.210", features = ["derive"]}
-serde_json = "1.0.128"
+clap = { version = "4.5.20", features = ["derive"] }
+serde = { version = "1.0.214", features = ["derive"]}
+serde_json = "1.0.132"
 rand = "0.8.5"
 rust-embed = "8.5.0"
-thiserror = "1.0.64"
-chrono = "0.4" 
+thiserror = "1.0.65"
+chrono = "0.4.38" 
 
 # Config
 dirs = "5.0.1"
 toml = "0.8.19"
-clap_complete = "4.5.32"
+clap_complete = "4.5.36"
