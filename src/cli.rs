@@ -67,6 +67,10 @@ pub struct Name {
     /// Show Pokémon stats
     #[clap(long)]
     pub stats: bool,
+
+    /// Show if the pokemon is already been encountered
+    #[clap(long)]
+    pub unique: bool,
 }
 
 /// Represents options for showing a random Pokémon.
@@ -127,6 +131,10 @@ pub struct Random {
     /// Show Pokémon stats
     #[clap(long)]
     pub stats: bool,
+
+    /// Show if the pokemon is already been encountered
+    #[clap(long)]
+    pub unique: bool,
 }
 
 /// Represents the various commands available in the CLI.

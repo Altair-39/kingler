@@ -1,6 +1,6 @@
 [package]
 name = "kingler"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Altair"]
 description = "Print pokemon sprites in your terminal"
 edition = "2021"
@@ -18,7 +18,7 @@ serde = { version = "1.0.214", features = ["derive"]}
 serde_json = "1.0.132"
 rand = "0.8.5"
 rust-embed = "8.5.0"
-thiserror = "1.0.65"
+thiserror = "2.0.0"
 chrono = "0.4.38" 
 
 # Config

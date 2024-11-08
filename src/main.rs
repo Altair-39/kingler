@@ -53,7 +53,7 @@ fn display_shiny_log(log_path: &str) -> Result<(), Error> {
     Ok(())
 }
 
-fn track_encounter(tracker_path: &str, pokemon_name: &str) -> Result<(), Error> {
+fn track_encounter(tracker_path: &str, pokemon_name: &str, unique: bool) -> Result<(), Error> {
     // Load existing encounters
     let mut tracker = if let Ok(file_content) = std::fs::read_to_string(tracker_path) {
         serde_json::from_str::<EncounteredPokemonTracker>(&file_content)
@@ -79,10 +79,9 @@ fn track_encounter(tracker_path: &str, pokemon_name: &str) -> Result<(), Error> 
         // Save the updated tracker back to the file
         let json = serde_json::to_string(&tracker)?;
         std::fs::write(tracker_path, json)?;
-    } else {
+    } else if unique {
         println!("{} has already been encountered.", pokemon_name);
     }
-
     Ok(())
 }
 
@@ -168,6 +167,7 @@ fn show_random_pokemon(
         None => return Err(Error::InvalidLanguage(config.language.clone())),
     };
 
+    let unique = random.unique;
     let pokedex_path = get_pokedex_path()?;
     // Track the encounter
     track_encounter(
@@ -175,6 +175,7 @@ fn show_random_pokemon(
             .to_str()
             .expect("Failed to convert PathBuf to str"),
         &selected_pokemon_name,
+        unique,
     )?;
     // Prepare forms to choose from
     let mut forms = vec!["regular".to_string()];
@@ -242,6 +243,7 @@ fn show_random_pokemon(
             no_title: random.no_title,
             padding_left: random.padding_left,
             stats: random.stats,
+            unique: random.unique,
         },
         pokemon_db,
         config,
