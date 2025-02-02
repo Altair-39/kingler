@@ -13,8 +13,7 @@ use pokemon::*;
 
 use clap::Parser;
 use clap_complete::Shell;
-use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::prelude::IndexedRandom;
 use rand::Rng;
 use rust_embed::RustEmbed;
 use serde::Deserialize;
@@ -136,7 +135,7 @@ fn show_random_pokemon(
         Some((start, end)) => (start, end),
         None => {
             let gen_list = random.generations.split(',').collect::<Vec<_>>();
-            let gen = gen_list.choose(&mut rand::thread_rng()).unwrap_or(&"1");
+            let gen = gen_list.choose(&mut rand::rng()).unwrap_or(&"1");
             (*gen, *gen) // Dereference to convert to (&str, &str)
         }
     };
@@ -156,7 +155,7 @@ fn show_random_pokemon(
         .collect();
 
     // Check if there are any Pokémon available after filtering
-    let selected_pokemon = match pokemon.choose(&mut rand::thread_rng()) {
+    let selected_pokemon = match pokemon.choose(&mut rand::rng()) {
         Some(&p) => p,
         None => return Err(Error::InvalidGeneration(random.generations.clone())),
     };
@@ -179,7 +178,6 @@ fn show_random_pokemon(
     )?;
     // Prepare forms to choose from
     let mut forms = vec!["regular".to_string()];
-    forms.extend(selected_pokemon.forms.iter().cloned());
 
     // Apply optional filters
     if random.no_mega {
@@ -194,12 +192,10 @@ fn show_random_pokemon(
 
     // Choose a form to show
     let default_form = "regular".to_string(); // Create a long-lived string
-    let form = forms
-        .choose(&mut rand::thread_rng())
-        .unwrap_or(&default_form); // Use a reference to the long-lived string
+    let form = forms.choose(&mut rand::rng()).unwrap_or(&default_form); // Use a reference to the long-lived string
 
     // Determine if the Pokémon is shiny
-    let shiny = rand::thread_rng().gen_bool(config.shiny_rate) || random.shiny;
+    let shiny = rand::rng().random_bool(config.shiny_rate) || random.shiny;
 
     // Log shiny captures if shiny is true
     if shiny {
@@ -308,7 +304,7 @@ fn show_pokemon_by_name(
                 let desc_lines: Vec<&str> = if name.info {
                     if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
                         let games: Vec<&String> = game_descriptions.keys().collect();
-                        if let Some(random_game) = games.choose(&mut thread_rng()) {
+                        if let Some(random_game) = games.choose(&mut rand::rng()) {
                             game_descriptions
                                 .get(*random_game)
                                 .map(|desc| desc.lines().collect())

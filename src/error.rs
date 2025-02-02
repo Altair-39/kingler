@@ -26,7 +26,7 @@ pub enum Error {
 
     /// Indicates an IO error occurred.
     #[error("I/O error: {0}")]
-    IoError(String), // Here you could keep it as a String to handle the error message
+    IoError(String),
 }
 
 impl From<io::Error> for Error {

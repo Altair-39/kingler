@@ -1,6 +1,6 @@
 use crate::Config;
 use crate::Pokemon;
-use rand::prelude::SliceRandom;
+use rand::prelude::IndexedRandom;
 
 /// Retrieves a random description for a given Pokémon based on the configured language.
 ///
@@ -21,7 +21,7 @@ pub fn get_random_description<'a>(pokemon: &'a Pokemon, config: &'a Config) -> V
         let game_keys: Vec<&String> = descriptions.keys().collect();
 
         // Randomly choose a game from the available keys.
-        if let Some(random_game) = game_keys.choose(&mut rand::thread_rng()) {
+        if let Some(random_game) = game_keys.choose(&mut rand::rng()) {
             // Retrieve and return the lines of the chosen description.
             if let Some(desc) = descriptions.get(*random_game) {
                 return desc.lines().collect(); // Return lines from the selected description.

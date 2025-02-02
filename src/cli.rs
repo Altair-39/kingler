@@ -30,6 +30,7 @@ pub struct ShellName {
 /// - `under`: A flag indicating whether to display the description under the Pokémon art.
 /// - `padding_left`: An integer specifying the amount of left padding for display.
 /// - `stats`: A flag indicating whether to show the Pokémon's stats.
+/// - `unique`: A flag inficating wheter the pokemon is unique or not.
 #[derive(Debug, Args)]
 pub struct Name {
     /// Name of the Pokémon to show
@@ -87,6 +88,7 @@ pub struct Name {
 /// - `no_regional`: A flag indicating whether to exclude regional forms.
 /// - `padding_left`: An integer specifying the amount of left padding for display.
 /// - `stats`: A flag indicating whether to show the Pokémon's stats.
+/// - `unique`: A flag inficating wheter the pokemon is unique or not.
 #[derive(Debug, Args)]
 pub struct Random {
     /// Generation number, range (1-9), or list of generations (1,3,6)

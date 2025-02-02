@@ -27,7 +27,6 @@ pub struct Pokemon {
     pub gen: u8,
     pub name: HashMap<String, String>,
     pub desc: HashMap<String, HashMap<String, String>>,
-    pub forms: Vec<String>,
     pub stats: Option<HashMap<String, u32>>,
 }
 
