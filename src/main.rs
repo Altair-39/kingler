@@ -270,13 +270,11 @@ fn show_pokemon_by_name(
     pokemon_db: Vec<Pokemon>,
     config: &Config,
 ) -> Result<(), Error> {
-    match pokemon_db.iter().find(|p| p.slug == name.name) {
+    let base_name = name.name.split('-').next().unwrap_or(&name.name);
+
+    match pokemon_db.iter().find(|p| p.slug == base_name) {
         Some(pokemon) => {
-            let slug = if name.form == "regular" {
-                name.name.clone()
-            } else {
-                format!("{}-{}", name.name, name.form)
-            };
+            let slug = name.name.clone();
 
             let art_path = if name.shiny {
                 format!("colorscripts/shiny/{}", slug)
@@ -287,12 +285,12 @@ fn show_pokemon_by_name(
             let art = Asset::get(&art_path)
                 .unwrap_or_else(|| panic!("Could not read pokemon art of '{}'", slug))
                 .data;
-            let art = str::from_utf8(&art).expect("Invalid UTF-8 in pokemon art");
+            let art = std::str::from_utf8(&art).expect("Invalid UTF-8 in pokemon art");
 
             if !name.no_title {
                 let pokemon_name = match pokemon.name.get(&config.language) {
                     Some(n) => n,
-                    _ => return Err(Error::InvalidLanguage(config.language.clone())),
+                    None => return Err(Error::InvalidLanguage(config.language.clone())),
                 };
                 print!("{: <1$}", pokemon_name, name.padding_left);
                 match name.form.as_str() {
@@ -300,89 +298,53 @@ fn show_pokemon_by_name(
                     other => println!(" ({other})"),
                 }
             }
-            if name.game_info.is_empty() {
-                let desc_lines: Vec<&str> = if name.info {
-                    if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
+            let desc_lines: Vec<&str> = if name.info {
+                if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
+                    if name.game_info.is_empty() {
                         let games: Vec<&String> = game_descriptions.keys().collect();
                         if let Some(random_game) = games.choose(&mut rand::rng()) {
                             game_descriptions
                                 .get(*random_game)
                                 .map(|desc| desc.lines().collect())
+                                .unwrap_or_default()
                         } else {
-                            None
+                            Vec::new()
                         }
                     } else {
-                        None
+                        game_descriptions
+                            .get(&name.game_info)
+                            .map(|desc| desc.lines().collect())
+                            .unwrap_or_else(|| description::get_random_description(pokemon, config))
                     }
                 } else {
-                    None
-                }
-                .unwrap_or_default();
-
-                if name.info {
-                    if name.under {
-                        ascii::draw_pokemon_art_under(
-                            art,
-                            desc_lines,
-                            name.padding_left,
-                            &config.language,
-                        );
-                    } else {
-                        ascii::draw_pokemon_art(
-                            art,
-                            desc_lines,
-                            name.padding_left,
-                            &config.language,
-                        );
-                    }
-                } else {
-                    ascii::print_ascii_art(art, name.padding_left);
+                    description::get_random_description(pokemon, config)
                 }
             } else {
-                let desc_lines: Vec<&str> = if name.info {
-                    if let Some(game_descriptions) = pokemon.desc.get(&config.language) {
-                        if let Some(game_desc) = game_descriptions.get(&name.game_info) {
-                            game_desc.lines().collect()
-                        } else {
-                            description::get_random_description(pokemon, config)
-                        }
-                    } else {
-                        description::get_random_description(pokemon, config)
-                    }
+                Vec::new()
+            };
+            if name.info {
+                if name.under {
+                    ascii::draw_pokemon_art_under(
+                        art,
+                        desc_lines,
+                        name.padding_left,
+                        &config.language,
+                    );
                 } else {
-                    Vec::new()
-                };
-                if name.info {
-                    if name.under {
-                        ascii::draw_pokemon_art_under(
-                            art,
-                            desc_lines,
-                            name.padding_left,
-                            &config.language,
-                        );
-                    } else {
-                        ascii::draw_pokemon_art(
-                            art,
-                            desc_lines,
-                            name.padding_left,
-                            &config.language,
-                        );
-                    }
-                } else {
-                    ascii::print_ascii_art(art, name.padding_left);
+                    ascii::draw_pokemon_art(art, desc_lines, name.padding_left, &config.language);
                 }
+            } else {
+                ascii::print_ascii_art(art, name.padding_left);
             }
 
-            // Display stats if the `stats` flag is set
             if name.stats {
                 stats::display_pokemon_stats(pokemon);
             }
+
+            Ok(())
         }
-        _ => {
-            return Err(Error::InvalidPokemon(name.name.clone()));
-        }
+        None => Err(Error::InvalidPokemon(name.name.clone())),
     }
-    Ok(())
 }
 
 fn get_pokedex_path() -> Result<PathBuf, io::Error> {

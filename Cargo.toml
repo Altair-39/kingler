@@ -1,6 +1,6 @@
 [package]
 name = "kingler"
-version = "0.4.3"
+version = "0.5.0"
 authors = ["Altair"]
 description = "Print pokemon sprites in your terminal"
 edition = "2021"
