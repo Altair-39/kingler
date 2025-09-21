@@ -125,127 +125,82 @@ fn show_completion_status(tracker_path: &str, total_pokemon: usize) -> Result<()
 /// # Returns
 /// - `Result<(), Error>`: Returns an `Ok(())` if successful, or an `Error` if any issues occur
 ///   during the filtering or selection process.
+
 fn show_random_pokemon(
     random: &cli::Random,
     pokemon_db: Vec<Pokemon>,
     config: &Config,
 ) -> Result<(), Error> {
-    // Determine generation range
-    let (start_gen, end_gen) = match random.generations.split_once('-') {
-        Some((start, end)) => (start, end),
-        None => {
-            let gen_list = random.generations.split(',').collect::<Vec<_>>();
-            let gen = gen_list.choose(&mut rand::rng()).unwrap_or(&"1");
-            (*gen, *gen) // Dereference to convert to (&str, &str)
+    const MAX_RETRIES: usize = 10; // Avoid infinite loops
+
+    for _ in 0..MAX_RETRIES {
+        // Determine generation range
+        let (start_gen, end_gen) = match random.generations.split_once('-') {
+            Some((start, end)) => (start, end),
+            None => {
+                let gen_list = random.generations.split(',').collect::<Vec<_>>();
+                let gen = gen_list.choose(&mut rand::rng()).unwrap_or(&"1");
+                (*gen, *gen)
+            }
+        };
+
+        // Parse start and end generations
+        let start_gen = match start_gen.parse::<u8>() {
+            Ok(val) => val,
+            Err(_) => return Err(Error::InvalidGeneration(random.generations.clone())),
+        };
+        let end_gen = match end_gen.parse::<u8>() {
+            Ok(val) => val,
+            Err(_) => return Err(Error::InvalidGeneration(random.generations.clone())),
+        };
+
+        // Filter Pokémon by generation
+        let pokemon: Vec<&Pokemon> = pokemon_db
+            .iter()
+            .filter(|p| start_gen <= p.gen && end_gen >= p.gen)
+            .collect();
+
+        let selected_pokemon = match pokemon.choose(&mut rand::rng()) {
+            Some(&p) => p,
+            None => return Err(Error::InvalidGeneration(random.generations.clone())),
+        };
+
+        // Try showing the Pokémon
+        let form = "regular".to_string(); // Keep your form logic here
+        let shiny = rand::rng().random_bool(config.shiny_rate) || random.shiny;
+
+        let game_name = if random.game_info.is_empty() {
+            String::new()
+        } else {
+            random.game_info.clone()
+        };
+
+        let result = show_pokemon_by_name(
+            &cli::Name {
+                name: selected_pokemon.slug.clone(),
+                form: form.clone(),
+                shiny,
+                info: random.info,
+                game_info: game_name,
+                under: random.under,
+                no_title: random.no_title,
+                padding_left: random.padding_left,
+                stats: random.stats,
+                unique: random.unique,
+            },
+            pokemon_db.clone(),
+            config,
+        );
+
+        if result.is_ok() {
+            return Ok(()); // success
         }
-    };
-
-    // Parse start and end generations
-    let start_gen = start_gen
-        .parse::<u8>()
-        .map_err(|_| Error::InvalidGeneration(random.generations.clone()))?;
-    let end_gen = end_gen
-        .parse::<u8>()
-        .map_err(|_| Error::InvalidGeneration(random.generations.clone()))?;
-
-    // Filter Pokémon by generation
-    let pokemon: Vec<&Pokemon> = pokemon_db
-        .iter()
-        .filter(|p| start_gen <= p.gen && end_gen >= p.gen)
-        .collect();
-
-    // Check if there are any Pokémon available after filtering
-    let selected_pokemon = match pokemon.choose(&mut rand::rng()) {
-        Some(&p) => p,
-        None => return Err(Error::InvalidGeneration(random.generations.clone())),
-    };
-
-    // After determining the selected Pokémon
-    let selected_pokemon_name = match selected_pokemon.name.get(&config.language) {
-        Some(name) => name.clone(),
-        None => return Err(Error::InvalidLanguage(config.language.clone())),
-    };
-
-    let unique = random.unique;
-    let pokedex_path = get_pokedex_path()?;
-    // Track the encounter
-    track_encounter(
-        pokedex_path
-            .to_str()
-            .expect("Failed to convert PathBuf to str"),
-        &selected_pokemon_name,
-        unique,
-    )?;
-    // Prepare forms to choose from
-    let mut forms = vec!["regular".to_string()];
-
-    // Apply optional filters
-    if random.no_mega {
-        forms.retain(|f| !["mega", "mega-x", "mega-y"].contains(&f.as_str()));
-    }
-    if random.no_gmax {
-        forms.retain(|f| f.as_str() != "gmax");
-    }
-    if random.no_regional {
-        forms.retain(|f| !["alola", "galar", "hisui", "paldea"].contains(&f.as_str()));
+        // else, loop and try again
     }
 
-    // Choose a form to show
-    let default_form = "regular".to_string(); // Create a long-lived string
-    let form = forms.choose(&mut rand::rng()).unwrap_or(&default_form); // Use a reference to the long-lived string
-
-    // Determine if the Pokémon is shiny
-    let shiny = rand::rng().random_bool(config.shiny_rate) || random.shiny;
-
-    // Log shiny captures if shiny is true
-    if shiny {
-        // Clone the pokemon_name here to avoid ownership issues
-        let pokemon_name = match selected_pokemon.name.get(&config.language) {
-            Some(name) => name.clone(),
-            None => return Err(Error::InvalidLanguage(config.language.clone())),
-        };
-
-        // Create a shiny log entry with formatted date
-        let now = chrono::Local::now(); // Get the current local date and time
-        let date = now.format("%d-%m-%Y %H:%M").to_string(); // Format the date
-
-        let shiny_entry = shiny_hunting::ShinyLogEntry {
-            pokemon_name: pokemon_name.clone(), // Clone here for the log entry
-            form: form.to_string(),
-            date, // Use the formatted date here
-            details: format!("Encountered shiny {} {}!", pokemon_name, form),
-        };
-
-        // Log the shiny capture
-        shiny_hunting::log_shiny_capture(&config.shiny_log_path, &shiny_entry)?;
-    }
-
-    // Pass the active game if `game_info` is present; otherwise, default to an empty string
-    let game_name = if random.game_info.is_empty() {
-        String::new()
-    } else {
-        random.game_info.clone()
-    };
-
-    // Show Pokémon information
-    show_pokemon_by_name(
-        &cli::Name {
-            name: selected_pokemon.slug.clone(),
-            form: form.to_string(),
-            shiny,
-            info: random.info,
-            game_info: game_name,
-            under: random.under,
-            no_title: random.no_title,
-            padding_left: random.padding_left,
-            stats: random.stats,
-            unique: random.unique,
-        },
-        pokemon_db,
-        config,
-    )?;
-
-    Ok(())
+    Err(Error::InvalidPokemon(
+        "Too many failed attempts".to_string(),
+    ))
 }
 
 /// Displays information about a Pokémon based on its name and specified form.

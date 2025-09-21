@@ -21,7 +21,7 @@ use crate::error::Error;
 ///   regular, mega, etc.).
 /// - `stats`: An optional hashmap that contains various stats of the Pokémon, where
 ///   the key is the stat name (e.g., "attack") and the value is the stat value.
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Pokemon {
     pub slug: String,
     pub gen: u8,
